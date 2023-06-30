@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:fast_contacts/fast_contacts.dart';
+// import 'package:contacts_service/contacts_service.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:fast_contacts/fast_contacts.dart';
+import 'package:flutter/foundation.dart';
 
 class PhoneNums extends StatefulWidget {
   PhoneNums({Key? key}) : super(key: key);
@@ -11,27 +13,6 @@ class PhoneNums extends StatefulWidget {
 
 class _PhoneNums extends State<PhoneNums> {
   @override
-  // 연락처 정보
-  final List<String> entries = <String>[
-    'A',
-    'B',
-    'C',
-    'D',
-    'E',
-    'F',
-    'A',
-    'B',
-    'C',
-    'D',
-    'E',
-    'F',
-    'A',
-    'B',
-    'C',
-    'D',
-    'E',
-    'F'
-  ];
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -45,26 +26,29 @@ class _PhoneNums extends State<PhoneNums> {
               if (snapshot.data == null) {
                 return const Center(
                   child:
-                      SizedBox(height: 50, child: CircularProgressIndicator()),
+                  SizedBox(height: 50, child: CircularProgressIndicator()),
                 );
               }
               return ListView.builder(
                   itemCount: snapshot.data.length,
                   itemBuilder: (context, index) {
                     Contact contact = snapshot.data[index];
-                    return ListTile(
-                      leading: const CircleAvatar(
-                        radius: 20,
-                        child: Icon(Icons.person),
+                    return Column(children: [
+                      ListTile(
+                        leading: const CircleAvatar(
+                          radius: 20,
+                          child: Icon(Icons.person),
+                        ),
+                        title: Text(contact.displayName),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text((contact.phones).toString()),
+                          ],
+                        ),
                       ),
-                      title: Text(contact.displayName),
-                      subtitle: Column(
-                        children: [
-                          Text(contact.phones[0]),
-                          Text(contact.emails[0]),
-                        ],
-                      ),
-                    );
+                      const Divider()
+                    ]);
                   });
             },
           ),
@@ -72,6 +56,7 @@ class _PhoneNums extends State<PhoneNums> {
       ),
     );
   }
+
 
   Future<List<Contact>> getContacts() async {
     bool isGranted = await Permission.contacts.status.isGranted;
