@@ -2,6 +2,7 @@ import 'package:assignment1/phone_nums.dart' as phone_nums;
 import 'package:assignment1/gallery.dart' as gallery;
 import 'package:assignment1/tmp_tab.dart' as tmp_tab;
 import 'package:flutter/material.dart';
+import 'package:contacts_service/contacts_service.dart';
 
 void main() {
   runApp(MyApp());
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(),
         body: TabBarView(
-          children: const [
+          children: [
             phone_nums.PhoneNums(),
             gallery.Gallery(),
             tmp_tab.TmpTab(),
