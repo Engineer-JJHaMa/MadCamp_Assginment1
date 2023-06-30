@@ -2,7 +2,7 @@ import 'package:assignment1/phone_nums.dart' as phone_nums;
 import 'package:assignment1/gallery.dart' as gallery;
 import 'package:assignment1/tmp_tab.dart' as tmp_tab;
 import 'package:flutter/material.dart';
-import 'package:contacts_service/contacts_service.dart';
+import 'package:fast_contacts/fast_contacts.dart';
 
 void main() {
   runApp(MyApp());
