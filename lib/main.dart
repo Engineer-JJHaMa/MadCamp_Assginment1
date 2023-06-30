@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(),
         body: TabBarView(
-          children: const [
+          children: [
             phone_nums.PhoneNums(),
             gallery.Gallery(),
             tmp_tab.TmpTab(),

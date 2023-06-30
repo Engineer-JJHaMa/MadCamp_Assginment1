@@ -26,7 +26,7 @@ class _PhoneNums extends State<PhoneNums> {
               if (snapshot.data == null) {
                 return const Center(
                   child:
-                  SizedBox(height: 50, child: CircularProgressIndicator()),
+                      SizedBox(height: 50, child: CircularProgressIndicator()),
                 );
               }
               return ListView.builder(
@@ -56,7 +56,6 @@ class _PhoneNums extends State<PhoneNums> {
       ),
     );
   }
-
 
   Future<List<Contact>> getContacts() async {
     bool isGranted = await Permission.contacts.status.isGranted;
