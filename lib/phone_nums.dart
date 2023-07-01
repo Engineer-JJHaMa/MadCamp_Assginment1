@@ -9,8 +9,6 @@ import 'package:flutter/foundation.dart';
 class PhoneNums extends StatefulWidget {
   PhoneNums({Key? key}) : super(key: key);
 
-
-
   @override
   _PhoneNums createState() => _PhoneNums(); // State 생성.
 }
@@ -20,6 +18,7 @@ class _PhoneNums extends State<PhoneNums> {
   void initState() {
     super.initState();
     getPhones();
+    getSms();
   }
 
   @override
@@ -88,7 +87,9 @@ class _PhoneNums extends State<PhoneNums> {
                                                   textColor: Colors.white,
                                                 ),
                                                 MaterialButton(
-                                                  onPressed: () {},
+                                                  onPressed: () {
+                                                    makeSms((contact.phones).toString());
+                                                  },
                                                   shape: CircleBorder(),
                                                   child: Icon(
                                                     Icons.message,
@@ -154,6 +155,14 @@ class _PhoneNums extends State<PhoneNums> {
     return [];
   }
 
+  getSms() async {
+    bool isGranted = await Permission.sms.status.isGranted;
+    if (!isGranted) {
+      isGranted = await Permission.sms.request().isGranted;
+    }
+    return [];
+  }
+
   void makePhoneCall(String url) async {
     String parsedUrl = url.substring(1, url.length - 1);
     if (await canLaunchUrlString('tel:$parsedUrl')) {
@@ -161,6 +170,15 @@ class _PhoneNums extends State<PhoneNums> {
     }
     else {
       throw 'cannot call';
+    }
+  }
+  void makeSms(String url) async {
+    String parsedUrl = url.substring(1, url.length - 1);
+    if (await canLaunchUrlString('sms:$parsedUrl')) {
+      await launchUrlString('sms:$parsedUrl');
+    }
+    else {
+      throw 'cannot send message';
     }
   }
 
