@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:developer';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -48,9 +47,8 @@ class _GalleryState extends State<Gallery> {
 
   Future<void> getImgList() async {
     var prefs = await SharedPreferences.getInstance();
-    debugPrint("lalalalal");
     try{
-      final imglist = prefs.getStringList('paths') ?? [];
+      var imglist = prefs.getStringList('paths') ?? [];
       for(final line in imglist){
         debugPrint('call: ' + line);
       }
@@ -66,10 +64,10 @@ class _GalleryState extends State<Gallery> {
     debugPrint('finish pick');
     if(images != null) {
       setState(() {
-        _pickedImgs = images;
+        _pickedImgs.addAll(images);
       });
       var prefs = await SharedPreferences.getInstance();
-      var imglist = images.map((xf) => xf.path).toList();
+      var imglist = _pickedImgs.map((xf) => xf.path).toList();
       for(final line in imglist){
         debugPrint('write: ' + line);
       }
