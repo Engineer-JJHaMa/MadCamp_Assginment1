@@ -8,6 +8,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Calendar extends StatefulWidget {
@@ -16,24 +17,25 @@ class Calendar extends StatefulWidget {
 }
 
 class _CalendarState extends State<Calendar> {
-  late final ValueNotifier<List<Event>> _selectedEvents;
+  final ValueNotifier<List<Event>> _selectedEvents = ValueNotifier(List.empty());
   final ValueNotifier<DateTime> _focusedDay = ValueNotifier(DateTime.now());
   DateTime _selectedDay = DateTime.now();
+  CalendarFormat _calendarFormat = CalendarFormat.week;
 
   final TextEditingController _textFieldController = TextEditingController();
   late PageController _pageController;
-  CalendarFormat _calendarFormat = CalendarFormat.week;
+  
 
   final events = LinkedHashMap<DateTime, List<Event>> (
     equals: isSameDay,
-    hashCode: getHashCode,
+    hashCode: (key) =>
+      key.day * 1000000 + key.month * 10000 + key.year,
   );
 
   @override
   void initState() {
     super.initState();
     _getEventsFromPreference();
-    _selectedEvents = ValueNotifier(_getEventsForDay(_focusedDay.value));
     // debugPrint("init finished");
   }
 
@@ -47,13 +49,47 @@ class _CalendarState extends State<Calendar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: (){
-          _displayTextInputDialog(context, _selectedDay);
-        },
-        backgroundColor: Colors.blue,
-        child: const Icon(Icons.add),
+      floatingActionButton: SpeedDial(
+        animatedIcon: AnimatedIcons.menu_close,
+        visible: true,
+        curve: Curves.bounceIn,
+        backgroundColor: Colors.indigo.shade900,
+        children: [
+          SpeedDialChild(
+              child: const Icon(Icons.add, color: Colors.white),
+              label: "일정 추가하기",
+              labelStyle: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                  fontSize: 13.0),
+              backgroundColor: Colors.indigo.shade900,
+              labelBackgroundColor: Colors.indigo.shade900,
+              onTap: () {
+                _displayTextInputDialog(context, _selectedDay);
+              }),
+          SpeedDialChild(
+            child: const Icon(
+              Icons.remove,
+              color: Colors.white,
+            ),
+            label: "일정 지우기",
+            backgroundColor: Colors.indigo.shade900,
+            labelBackgroundColor: Colors.indigo.shade900,
+            labelStyle: const TextStyle(
+                fontWeight: FontWeight.w500, color: Colors.white, fontSize: 13.0),
+            onTap: () {
+              _displayRemovalDialog(context);
+            },
+          )
+        ],
       ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: (){
+      //     _displayTextInputDialog(context, _selectedDay);
+      //   },
+      //   backgroundColor: Colors.blue,
+      //   child: const Icon(Icons.add),
+      // ),
       body: Column(
         children: [
           ValueListenableBuilder<DateTime>(
@@ -61,9 +97,6 @@ class _CalendarState extends State<Calendar> {
             builder: (context, value, _) {
               return _CalendarHeader(
                 focusedDay: value,
-                onTodayButtonTap: () {
-                  setState(() => _focusedDay.value = DateTime.now());
-                },
                 onLeftArrowTap: () {
                   _pageController.previousPage(
                     duration: Duration(milliseconds: 300),
@@ -87,7 +120,6 @@ class _CalendarState extends State<Calendar> {
             selectedDayPredicate: (day) {
               // Use `selectedDayPredicate` to determine which day is currently selected.
               // If this returns true, then `day` will be marked as selected.
-
               // Using `isSameDay` is recommended to disregard
               // the time-part of compared DateTime objects.
               return isSameDay(_selectedDay, day);
@@ -129,7 +161,7 @@ class _CalendarState extends State<Calendar> {
                             _updatePreference();
                           });
                         },
-                        secondary: const Icon(Icons.hourglass_empty),
+                        //secondary: const Icon(Icons.hourglass_empty),
                         selected: true,
                       ),
                     );
@@ -183,13 +215,7 @@ class _CalendarState extends State<Calendar> {
       setState(() {
         _jsonToEvents(json);
       });
-      Future.delayed(Duration(seconds: 1), () {
-        
-        debugPrint("delay ends");
-      });
       _selectedEvents.value = _getEventsForDay(_selectedDay);
-      debugPrint("call finished");
-
     }catch(e){debugPrint('error: $e');}
   }
 
@@ -225,6 +251,15 @@ class _CalendarState extends State<Calendar> {
     Navigator.pop(context);
   }
 
+  Future<void> _onEventsRemoved(DateTime day) async {
+    setState(() {
+      if(events.containsKey(day)){
+        debugPrint("removal start");
+        events[day]?.removeWhere((e) => e.ischecked);
+      }
+    });
+  }
+
   Future<void> _displayTextInputDialog(BuildContext context, DateTime day) async {
     return showDialog(
       context: context,
@@ -251,20 +286,41 @@ class _CalendarState extends State<Calendar> {
       },
     );
   }
+
+  Future<void> _displayRemovalDialog(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('일정 지우기'),
+        content: const Text('완료한 일정을 제거할까요?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'Cancel'),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              _onEventsRemoved(_selectedDay);
+              Navigator.pop(context, 'OK');
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _CalendarHeader extends StatelessWidget {
   final DateTime focusedDay;
   final VoidCallback onLeftArrowTap;
   final VoidCallback onRightArrowTap;
-  final VoidCallback onTodayButtonTap;
 
   const _CalendarHeader({
     Key? key,
     required this.focusedDay,
     required this.onLeftArrowTap,
     required this.onRightArrowTap,
-    required this.onTodayButtonTap,
   }) : super(key: key);
 
   @override
@@ -317,10 +373,6 @@ class Event {
   String zip() => title + "/" + ischecked.toString();
 }
 
-
-int getHashCode(DateTime key) {
-  return key.day * 1000000 + key.month * 10000 + key.year;
-}
 
 final kToday = DateTime.now();
 final kFirstDay = DateTime(kToday.year, kToday.month - 3, kToday.day);
