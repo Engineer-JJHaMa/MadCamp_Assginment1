@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import 'dart:collection';
-import 'dart:ffi';
 import 'dart:convert';
 import 'dart:developer';
 
@@ -21,6 +20,7 @@ class _CalendarState extends State<Calendar> {
   final ValueNotifier<DateTime> _focusedDay = ValueNotifier(DateTime.now());
   DateTime _selectedDay = DateTime.now();
 
+  final TextEditingController _textFieldController = TextEditingController();
   late PageController _pageController;
   CalendarFormat _calendarFormat = CalendarFormat.week;
 
@@ -29,63 +29,12 @@ class _CalendarState extends State<Calendar> {
     hashCode: getHashCode,
   );
 
-  String eventsToJson () {
-    const JsonEncoder encoder = JsonEncoder();
-
-    Map<String, String> tmp = events.map((key, value) => 
-      MapEntry(key.toString(), value.map((e) => e.zip()).join("\n")));
-    final String jsonString = encoder.convert(tmp);
-    debugPrint("encoded to: " + jsonString);
-    return jsonString;
-  }
-
-  void jsonToEvents (String json) {
-    const JsonDecoder decoder = JsonDecoder();
-
-    Map<String, dynamic> tmp0 = decoder.convert(json);
-    Map<String, String> tmp = tmp0.map((key, value) => MapEntry(key, value.toString()));
-    tmp.forEach((k, v) => 
-      debugPrint("key: " + k + ", value: " + v)
-    );
-    
-    Map<DateTime, List<Event>> src = tmp.map((key, value) {
-        return MapEntry(DateTime.parse(key), value.split("\n").map((z) => Event.unzip(z)).toList());
-      }
-    );
-    debugPrint("decoded to :" + src.toString());
-    events.clear();
-    events.addAll(src);
-  }
-
-  Future<void> updatePreference() async {
-    var prefs = await SharedPreferences.getInstance();
-    await prefs.setString('eventsjson', eventsToJson());
-  }
-
-  Future<void> getEventsFromPreference() async {
-    var prefs = await SharedPreferences.getInstance();
-    try{
-      final json = prefs.getString('eventsjson') ?? '';
-      debugPrint('call: ' + json);
-      setState(() {
-        jsonToEvents(json);
-      });
-      Future.delayed(Duration(seconds: 1), () {
-        
-        debugPrint("delay ends");
-      });
-      _selectedEvents.value = _getEventsForDay(_selectedDay);
-      debugPrint("call finished");
-
-    }catch(e){debugPrint('error: $e');}
-  }
-
   @override
   void initState() {
     super.initState();
-    getEventsFromPreference();
+    _getEventsFromPreference();
     _selectedEvents = ValueNotifier(_getEventsForDay(_focusedDay.value));
-    debugPrint("init finished");
+    // debugPrint("init finished");
   }
 
   @override
@@ -93,66 +42,6 @@ class _CalendarState extends State<Calendar> {
     _focusedDay.dispose();
     _selectedEvents.dispose();
     super.dispose();
-  }
-
-  List<Event> _getEventsForDay(DateTime day) {
-    return events[day] ?? [];
-  }
-
-  void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
-    setState(() {
-      if(!isSameDay(_selectedDay, selectedDay)) {
-        setState(() {
-          _selectedDay = selectedDay;
-          _focusedDay.value = focusedDay;
-        });
-      }
-    });
-
-    _selectedEvents.value = _getEventsForDay(selectedDay);
-  }
-
-  Future<void> _onEventsCreated (DateTime day) async {
-    print(_textFieldController.text);
-    setState(() {
-      if(events.containsKey(day)){
-        events[day]?.add(Event(_textFieldController.text ?? 'empty string'));
-      } else {
-        events[day] = List.filled(1, Event(_textFieldController.text ?? 'empty string'), growable: true);
-      }
-      _selectedEvents.value = _getEventsForDay(day);
-    });
-    final json = eventsToJson();
-    var prefs = await SharedPreferences.getInstance();
-    await prefs.setString('eventsjson', json);
-    Navigator.pop(context);
-  }
-
-  Future<void> _displayTextInputDialog(BuildContext context, DateTime day) async {
-    return showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Add plan'),
-          content: TextField(
-            controller: _textFieldController,
-            decoration: InputDecoration(hintText: "type your plan"),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('CANCEL'),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            TextButton(
-              child: Text('OK'),
-              onPressed: () => _onEventsCreated(day),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -237,7 +126,7 @@ class _CalendarState extends State<Calendar> {
                         onChanged: (bool? value) {
                           setState(() {
                             val[index].ischecked = value ?? false;
-                            updatePreference();
+                            _updatePreference();
                           });
                         },
                         secondary: const Icon(Icons.hourglass_empty),
@@ -251,6 +140,115 @@ class _CalendarState extends State<Calendar> {
           ),
         ],
       ),
+    );
+  }
+
+  String _eventsToJson () {
+    const JsonEncoder encoder = JsonEncoder();
+
+    Map<String, String> tmp = events.map((key, value) => 
+      MapEntry(key.toString(), value.map((e) => e.zip()).join("\n")));
+    final String jsonString = encoder.convert(tmp);
+    //debugPrint("encoded to: " + jsonString);
+    return jsonString;
+  }
+
+  void _jsonToEvents (String json) {
+    const JsonDecoder decoder = JsonDecoder();
+
+    Map<String, dynamic> tmp0 = decoder.convert(json);
+    Map<String, String> tmp = tmp0.map((key, value) => MapEntry(key, value.toString()));
+    // tmp.forEach((k, v) => 
+    //   debugPrint("key: " + k + ", value: " + v)
+    // );
+    Map<DateTime, List<Event>> src = tmp.map((key, value) {
+        return MapEntry(DateTime.parse(key), value.split("\n").map((z) => Event.unzip(z)).toList());
+      }
+    );
+    // debugPrint("decoded to :" + src.toString());
+    events.clear();
+    events.addAll(src);
+  }
+
+  Future<void> _updatePreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('eventsjson', _eventsToJson());
+  }
+
+  Future<void> _getEventsFromPreference() async {
+    var prefs = await SharedPreferences.getInstance();
+    try{
+      final json = prefs.getString('eventsjson') ?? '';
+      debugPrint('call: ' + json);
+      setState(() {
+        _jsonToEvents(json);
+      });
+      Future.delayed(Duration(seconds: 1), () {
+        
+        debugPrint("delay ends");
+      });
+      _selectedEvents.value = _getEventsForDay(_selectedDay);
+      debugPrint("call finished");
+
+    }catch(e){debugPrint('error: $e');}
+  }
+
+  List<Event> _getEventsForDay(DateTime day) {
+    return events[day] ?? [];
+  }
+
+  void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
+    setState(() {
+      if(!isSameDay(_selectedDay, selectedDay)) {
+        setState(() {
+          _selectedDay = selectedDay;
+          _focusedDay.value = focusedDay;
+        });
+      }
+    });
+    _selectedEvents.value = _getEventsForDay(selectedDay);
+  }
+
+  Future<void> _onEventsCreated (DateTime day) async {
+    print(_textFieldController.text);
+    setState(() {
+      if(events.containsKey(day)){
+        events[day]?.add(Event(_textFieldController.text ?? 'empty string'));
+      } else {
+        events[day] = List.filled(1, Event(_textFieldController.text ?? 'empty string'), growable: true);
+      }
+      _selectedEvents.value = _getEventsForDay(day);
+    });
+    final json = _eventsToJson();
+    var prefs = await SharedPreferences.getInstance();
+    await prefs.setString('eventsjson', json);
+    Navigator.pop(context);
+  }
+
+  Future<void> _displayTextInputDialog(BuildContext context, DateTime day) async {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Add plan'),
+          content: TextField(
+            controller: _textFieldController,
+            decoration: InputDecoration(hintText: "type your plan"),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('CANCEL'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              child: Text('OK'),
+              onPressed: () => _onEventsCreated(day),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -300,10 +298,6 @@ class _CalendarHeader extends StatelessWidget {
   }
 }
 
-// utils for calendar
-// Copyright 2019 Aleksander Woźniak
-// SPDX-License-Identifier: Apache-2.
-/// Example event class.
 class Event {
   late String title;
   late bool ischecked;
@@ -320,30 +314,14 @@ class Event {
 
   @override
   String toString() => title;
-
   String zip() => title + "/" + ischecked.toString();
 }
 
-/// Example events.
-///
-/// Using a [LinkedHashMap] is highly recommended if you decide to use a map.
 
 int getHashCode(DateTime key) {
   return key.day * 1000000 + key.month * 10000 + key.year;
 }
 
-/// Returns a list of [DateTime] objects from [first] to [last], inclusive.
-List<DateTime> daysInRange(DateTime first, DateTime last) {
-  final dayCount = last.difference(first).inDays + 1;
-  return List.generate(
-    dayCount,
-    (index) => DateTime.utc(first.year, first.month, first.day + index),
-  );
-}
-
 final kToday = DateTime.now();
 final kFirstDay = DateTime(kToday.year, kToday.month - 3, kToday.day);
 final kLastDay = DateTime(kToday.year, kToday.month + 3, kToday.day);
-
-TextEditingController _textFieldController = TextEditingController();
-
