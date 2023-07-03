@@ -8,7 +8,7 @@ import 'dart:developer';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -33,11 +33,17 @@ class _CalendarState extends State<Calendar> {
     hashCode: (key) =>
       key.day * 1000000 + key.month * 10000 + key.year,
   );
+  final weathers = LinkedHashMap<DateTime, String> (
+    equals: isSameDay,
+    hashCode: (key) =>
+      key.day * 1000000 + key.month * 10000 + key.year,
+  );
 
   @override
   void initState() {
     super.initState();
     _getEventsFromPreference();
+    _getWeatherInfo(DateTime.now());
     // debugPrint("type of dotenv: " + dotenv.env.runtimeType.toString());
     // debugPrint('map: ' + dotenv.env.toString());
     // debugPrint('map: ' + dotenv.env['API_KEY'].toString());
@@ -134,6 +140,10 @@ class _CalendarState extends State<Calendar> {
             },
           ),
           const SizedBox(height: 8.0),
+          Visibility(
+            child: Text("오늘의 날씨는 " + (weathers[_selectedDay] ?? "") + " 입니다"),
+            visible: weathers[_selectedDay] != null,
+          ),
           Expanded(
             child: ValueListenableBuilder<List<Event>>(
               valueListenable: _selectedEvents,
@@ -307,6 +317,47 @@ class _CalendarState extends State<Calendar> {
       ),
     );
   }
+
+  Future<Map<DateTime, String>> _getWeatherInfo(DateTime day) async {
+    const JsonDecoder decoder = JsonDecoder();
+    final Map<DateTime, String> weather = Map();
+    final key = dotenv.env['API_KEY'] ?? 'APIkey is not found';
+    debugPrint("key: " + key);
+    const dataType = "JSON";
+    const regId = "11C20000"; //대전, 세종, 충남으로 일단 고정
+    final tmFc = day.year.toString()
+    + day.month.toString().padLeft(2, '0')
+    + day.day.toString().padLeft(2, '0')
+    + "0600";
+    final url = Uri.https("apis.data.go.kr", "/1360000/MidFcstInfoService/getMidLandFcst", {
+      "serviceKey": key,
+      "dataType": dataType,
+      "regId": regId,
+      "tmFc": tmFc,
+    });
+
+    // debugPrint("url: " + url.toString());
+    final http.Response response = await http.get(url);
+
+    debugPrint('Response status: ${response.statusCode}');
+    debugPrint('Response body: ${response.body}');
+
+    final Map<String, dynamic> body = decoder.convert(response.body);
+    final Map<String, dynamic> contents = body["response"]["body"]["items"]["item"][0] ?? Map();
+    debugPrint(contents.toString());
+
+    const [3, 4, 5, 6, 7].forEach((after) =>
+      weather[day.add(Duration(days: after))] = contents["wf" + after.toString() + "Am"]);
+    const [8, 9, 10].forEach((after) =>
+      weather[day.add(Duration(days: after))] = contents["wf" + after.toString()]);
+    weather.forEach((key, value) {
+      debugPrint("k: "+key.toString()+"v: "+value.toString());
+    });
+    weathers.clear();
+    weathers.addAll(weather);
+
+    return weather;
+  }
 }
 
 class _CalendarHeader extends StatelessWidget {
@@ -370,7 +421,6 @@ class Event {
   String toString() => title;
   String zip() => title + "/" + ischecked.toString();
 }
-
 
 final kToday = DateTime.now();
 final kFirstDay = DateTime(kToday.year, kToday.month - 3, kToday.day);
