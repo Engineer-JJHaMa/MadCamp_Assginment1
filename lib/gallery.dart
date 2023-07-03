@@ -69,7 +69,6 @@ class _GalleryState extends State<Gallery> {
                     child: GestureDetector(
                       onTap: () {
                         setState(() {
-                          debugPrint('gfdgdhgfd');
                           _dltImg(xf);
                         });
                       },
@@ -86,14 +85,20 @@ class _GalleryState extends State<Gallery> {
   }
 
 
+  void _updatePreference() async {
+    var prefs = await SharedPreferences.getInstance();
+    var imglist = _pickedImgs.map((xf) => xf.path).toList();
+    await prefs.remove('paths');
+    prefs.setStringList('paths', imglist);
+  }
 
-  // initial state
+
+
   Future<void> getImgList() async {
     var prefs = await SharedPreferences.getInstance();
     try{
       var imglist = prefs.getStringList('paths') ?? [];
       for(final line in imglist){
-        debugPrint('call: ' + line);
       }
       var images = imglist.map((path) => XFile(path)).toList();
       setState(() {
@@ -108,24 +113,17 @@ class _GalleryState extends State<Gallery> {
       setState(() {
         _pickedImgs.addAll(images);
       });
-      var prefs = await SharedPreferences.getInstance();
-      var imglist = _pickedImgs.map((xf) => xf.path).toList();
-      await prefs.remove('paths');
-      prefs.setStringList('paths', imglist);
+      _updatePreference();
     }
   }
 
   void _dltImg(data) async {
     _pickedImgs.remove(data);
-    var prefs = await SharedPreferences.getInstance();
-    var imglist = _pickedImgs.map((xf) => xf.path).toList();
-    await prefs.remove('paths');
-    prefs.setStringList('paths', imglist);
+    _updatePreference();
   }
 
   void _initImg() async {
     setState(() {
-      debugPrint('init is executed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
       _pickedImgs.clear();
     });
     var prefs = await SharedPreferences.getInstance();
