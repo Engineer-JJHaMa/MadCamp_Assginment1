@@ -140,9 +140,12 @@ class _CalendarState extends State<Calendar> {
             },
           ),
           const SizedBox(height: 8.0),
-          Visibility(
-            child: Text("이날의 날씨는 " + (weathers[_selectedDay] ?? "") + " 입니다"),
-            visible: weathers[_selectedDay] != null,
+          Padding(
+            padding: EdgeInsets.fromLTRB(0, 2, 0, 2),
+            child: Visibility(
+              child: Text("이날의 날씨는 " + (weathers[_selectedDay] ?? "") + " 입니다"),
+              visible: weathers[_selectedDay] != null,
+            ),
           ),
           Expanded(
             child: ValueListenableBuilder<List<Event>>(

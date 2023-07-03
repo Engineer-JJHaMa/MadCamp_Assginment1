@@ -10,28 +10,83 @@ void main() async {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin{
+  static const mainColor = Color(0xFF20BF55);
+  static const subColor = Color(0xFF01BAEF);
+  List<Tab> tabs = [
+    Tab(icon: Icon(Icons.phone, color: Colors.white)),
+    Tab(icon: Icon(Icons.perm_media, color: subColor,)),
+    Tab(icon: Icon(Icons.contact_page, color: subColor,)),
+  ];
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(vsync: this, length: tabs.length);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    _tabController.addListener(() {
+      if(!_tabController.indexIsChanging){
+        setState(() {
+          if(_tabController.index == 0){
+            tabs = [
+              Tab(icon: Icon(Icons.phone, color: Colors.white)),
+              Tab(icon: Icon(Icons.perm_media, color: subColor,)),
+              Tab(icon: Icon(Icons.contact_page, color: subColor,)),
+            ];
+          } else if(_tabController.index == 1) {
+            tabs = [
+              Tab(icon: Icon(Icons.phone, color: mainColor)),
+              Tab(icon: Icon(Icons.perm_media, color: Colors.white,)),
+              Tab(icon: Icon(Icons.contact_page, color: subColor,)),
+            ];
+          } else {
+            tabs = [
+              Tab(icon: Icon(Icons.phone, color: mainColor)),
+              Tab(icon: Icon(Icons.perm_media, color: mainColor,)),
+              Tab(icon: Icon(Icons.contact_page, color: Colors.white,)),
+            ];
+          }
+        });
+      }
+    },);
     return MaterialApp(
-      home: DefaultTabController(
-        length: 3,
-        child: Scaffold(
-          appBar: AppBar(),
-          body: TabBarView(
-            children: [
-              phone_nums.PhoneNums(),
-              gallery.Gallery(),
-              calendar.Calendar(),
-            ],
-          ),
-          bottomNavigationBar: Container(
-            color: Colors.blue,
-            child: TabBar(tabs: const [
-              Tab(icon: Icon(Icons.phone)),
-              Tab(icon: Icon(Icons.perm_media)),
-              Tab(icon: Icon(Icons.contact_page)),
-            ])
+      home: Scaffold(
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            phone_nums.PhoneNums(),
+            gallery.Gallery(),
+            calendar.Calendar(),
+          ],
+        ),
+        bottomNavigationBar: Container(
+          color: Colors.white,
+          child: TabBar(
+            controller: _tabController,
+            tabs: tabs,
+            unselectedLabelColor: Color(0xFF01BAEF),
+            indicatorSize: TabBarIndicatorSize.tab,
+            indicator: BoxDecoration(
+              gradient: LinearGradient(
+                  colors: [Color(0xFF20BF55), Color(0xFF01BAEF)]),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+              color: Colors.redAccent
+            ),
           ),
         ),
       )
