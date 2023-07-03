@@ -8,7 +8,7 @@ import 'dart:developer';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -33,11 +33,17 @@ class _CalendarState extends State<Calendar> {
     hashCode: (key) =>
       key.day * 1000000 + key.month * 10000 + key.year,
   );
+  final weathers = LinkedHashMap<DateTime, String> (
+    equals: isSameDay,
+    hashCode: (key) =>
+      key.day * 1000000 + key.month * 10000 + key.year,
+  );
 
   @override
   void initState() {
     super.initState();
     _getEventsFromPreference();
+    _getWeatherInfo(DateTime.now());
     // debugPrint("type of dotenv: " + dotenv.env.runtimeType.toString());
     // debugPrint('map: ' + dotenv.env.toString());
     // debugPrint('map: ' + dotenv.env['API_KEY'].toString());
@@ -134,6 +140,13 @@ class _CalendarState extends State<Calendar> {
             },
           ),
           const SizedBox(height: 8.0),
+          Padding(
+            padding: EdgeInsets.fromLTRB(0, 2, 0, 2),
+            child: Visibility(
+              child: Text("이날의 날씨는 " + (weathers[_selectedDay] ?? "") + " 입니다"),
+              visible: weathers[_selectedDay] != null,
+            ),
+          ),
           Expanded(
             child: ValueListenableBuilder<List<Event>>(
               valueListenable: _selectedEvents,
@@ -307,6 +320,72 @@ class _CalendarState extends State<Calendar> {
       ),
     );
   }
+
+  Future<void> _getWeatherInfo(DateTime day) async {
+    const JsonDecoder decoder = JsonDecoder();
+    final Map<DateTime, String> weather = Map();
+    final key = dotenv.env['API_KEY'] ?? 'APIkey is not found';
+    debugPrint("key: " + key);
+    const dataType = "JSON";
+    const regId = "11C20000"; //대전, 세종, 충남으로 일단 고정
+    final tmFc = day.year.toString()
+    + day.month.toString().padLeft(2, '0')
+    + day.day.toString().padLeft(2, '0');
+
+    final urlShortWeather = Uri.https("apis.data.go.kr", "/1360000/VilageFcstInfoService_2.0/getVilageFcst", {
+      "serviceKey": key,
+      "numOfRows": "1000",
+      "dataType": dataType,
+      "base_date": tmFc,
+      "base_time": "0500",
+      "nx": "55",
+      "ny": "127",
+    });
+    final urlMiddleWeather = Uri.https("apis.data.go.kr", "/1360000/MidFcstInfoService/getMidLandFcst", {
+      "serviceKey": key,
+      "dataType": dataType,
+      "regId": regId,
+      "tmFc": tmFc + "0600",
+    });
+
+    // debugPrint("url: " + url.toString());
+    final http.Response responseShort = await http.get(urlShortWeather);
+    final http.Response responseMiddle = await http.get(urlMiddleWeather);
+
+    debugPrint('Response status: ${responseMiddle.statusCode}');
+    debugPrint('Response body: ${responseMiddle.body}');
+
+    final Map<String, dynamic> bodyShort = decoder.convert(responseShort  .body);
+    final Map<String, dynamic> bodyMiddle = decoder.convert(responseMiddle.body);
+    final List<dynamic> contentsShort = bodyShort["response"]["body"]["items"]["item"] ?? List.empty();
+    final Map<String, dynamic> contentsMiddle = bodyMiddle["response"]["body"]["items"]["item"][0] ?? Map();
+    debugPrint(contentsMiddle.toString());
+
+    const [0, 1, 2].forEach((after) {
+      final contentsShortFiltered = contentsShort.where((e) => 
+        (e["fcstDate"] == day.year.toString()
+          + day.month.toString().padLeft(2, '0')
+          + (day.day + after).toString().padLeft(2, '0'))
+        & (e["fcstTime"] == "0800")
+        & ((e["category"] == "SKY")|(e["category"] == "PTY"))).toList();
+      debugPrint(contentsShortFiltered.toString());
+
+      weather[day.add(Duration(days: after))] = 
+        weatherCode[int.parse(contentsShortFiltered[1]["fcstValue"])*10
+          + int.parse(contentsShortFiltered[0]["fcstValue"])];
+    });
+    const [3, 4, 5, 6, 7].forEach((after) =>
+      weather[day.add(Duration(days: after))] = contentsMiddle["wf" + after.toString() + "Am"]);
+    const [8, 9, 10].forEach((after) =>
+      weather[day.add(Duration(days: after))] = contentsMiddle["wf" + after.toString()]);
+    weather.forEach((key, value) {
+      debugPrint("k: "+key.toString()+"v: "+value.toString());
+    });
+    setState(() {
+      weathers.clear();
+      weathers.addAll(weather);
+    });
+  }
 }
 
 class _CalendarHeader extends StatelessWidget {
@@ -371,7 +450,14 @@ class Event {
   String zip() => title + "/" + ischecked.toString();
 }
 
-
 final kToday = DateTime.now();
 final kFirstDay = DateTime(kToday.year, kToday.month - 3, kToday.day);
 final kLastDay = DateTime(kToday.year, kToday.month + 3, kToday.day);
+
+const List<String> weatherCode = [
+  "", "맑음", "", "구름많음", "흐림",
+  "", "맑고 비", "", "구름없고 비", "흐리고 비",
+  "", "맑고 비/눈", "", "구름없고 비/눈", "흐리고 비/눈",
+  "", "맑고 눈", "", "구름없고 눈", "흐리고 눈",
+  "", "맑고 소나기", "", "구름없고 소나기", "흐리고 소나기",
+];
