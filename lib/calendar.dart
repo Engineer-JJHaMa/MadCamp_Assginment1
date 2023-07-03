@@ -5,11 +5,13 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:http/http.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class Calendar extends StatefulWidget {
   @override
@@ -36,6 +38,9 @@ class _CalendarState extends State<Calendar> {
   void initState() {
     super.initState();
     _getEventsFromPreference();
+    // debugPrint("type of dotenv: " + dotenv.env.runtimeType.toString());
+    // debugPrint('map: ' + dotenv.env.toString());
+    // debugPrint('map: ' + dotenv.env['API_KEY'].toString());
     // debugPrint("init finished");
   }
 
@@ -83,13 +88,6 @@ class _CalendarState extends State<Calendar> {
           )
         ],
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: (){
-      //     _displayTextInputDialog(context, _selectedDay);
-      //   },
-      //   backgroundColor: Colors.blue,
-      //   child: const Icon(Icons.add),
-      // ),
       body: Column(
         children: [
           ValueListenableBuilder<DateTime>(
