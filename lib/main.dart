@@ -1,10 +1,12 @@
 import 'package:assignment1/phone_nums.dart' as phone_nums;
 import 'package:assignment1/gallery.dart' as gallery;
-import 'package:assignment1/tmp_tab.dart' as tmp_tab;
+import 'package:assignment1/calendar.dart' as calendar;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:fast_contacts/fast_contacts.dart';
 
-void main() {
+void main() async {
+  await dotenv.load(fileName: "assets/.env");
   runApp(MyApp());
 }
 
@@ -20,7 +22,7 @@ class MyApp extends StatelessWidget {
           children: [
             phone_nums.PhoneNums(),
             gallery.Gallery(),
-            tmp_tab.TmpTab(),
+            calendar.Calendar(),
           ],
         ),
         bottomNavigationBar: Container(
