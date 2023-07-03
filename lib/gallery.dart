@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:developer';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,42 +16,89 @@ class _GalleryState extends State<Gallery> {
   List<XFile> _pickedImgs = [];
 
   @override
+  void initState() {
+    super.initState();
+    getImgList();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: (){_pickImg();},
-        backgroundColor: Colors.blue,
-        child: const Icon(Icons.add),
+      floatingActionButton: Stack(
+        children: <Widget>[
+          Align(
+            alignment: Alignment(
+              Alignment.bottomRight.x, Alignment.bottomRight.y - 0.3),
+                child: FloatingActionButton(
+                  onPressed: (){_pickImg();},
+                  backgroundColor: Colors.blue,
+                  child: const Icon(Icons.add),
+                ),
+              ),
+          Align(
+            alignment: Alignment.bottomRight,
+                child: FloatingActionButton(
+                onPressed: (){
+                   _initImg();
+                },
+                  backgroundColor: Colors.red,
+                  child: const Icon(Icons.delete),
+            ),
+          ),
+        ],
       ),
+
+
+
       body: GridView.count(
         primary: false,
         padding: const EdgeInsets.all(2),
         crossAxisSpacing: 2,
         mainAxisSpacing: 2,
         crossAxisCount: 3,
+
         children: _pickedImgs.map((xf) => Container(
-          child: Image.file(
-            File(xf.path),
-            fit: BoxFit.cover,
-            ),
-        )).toList(),
+          child: Stack(
+              fit: StackFit.expand,
+              children: [Image.file(
+                File(xf.path),
+                fit: BoxFit.cover,
+                ),
+                Positioned(
+                    right: 1,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _dltImg(xf);
+                        });
+                      },
+                      child: const Icon(Icons.cancel, color: Colors.red),
+                    )
+                  )
+                ]
+              ),
+            )).toList(),
+
+
       ),
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    getImgList();
+
+  void _updatePreference() async {
+    var prefs = await SharedPreferences.getInstance();
+    var imglist = _pickedImgs.map((xf) => xf.path).toList();
+    await prefs.remove('paths');
+    prefs.setStringList('paths', imglist);
   }
+
+
 
   Future<void> getImgList() async {
     var prefs = await SharedPreferences.getInstance();
-    debugPrint("lalalalal");
     try{
-      final imglist = prefs.getStringList('paths') ?? [];
+      var imglist = prefs.getStringList('paths') ?? [];
       for(final line in imglist){
-        debugPrint('call: ' + line);
       }
       var images = imglist.map((path) => XFile(path)).toList();
       setState(() {
@@ -63,19 +109,25 @@ class _GalleryState extends State<Gallery> {
 
   Future<void> _pickImg() async {
     final List<XFile>? images = await _picker.pickMultiImage();
-    debugPrint('finish pick');
     if(images != null) {
       setState(() {
-        _pickedImgs = images;
+        _pickedImgs.addAll(images);
       });
-      var prefs = await SharedPreferences.getInstance();
-      var imglist = images.map((xf) => xf.path).toList();
-      for(final line in imglist){
-        debugPrint('write: ' + line);
-      }
-      await prefs.remove('paths');
-      prefs.setStringList('paths', imglist);
+      _updatePreference();
     }
+  }
+
+  void _dltImg(data) async {
+    _pickedImgs.remove(data);
+    _updatePreference();
+  }
+
+  void _initImg() async {
+    setState(() {
+      _pickedImgs.clear();
+    });
+    var prefs = await SharedPreferences.getInstance();
+    await prefs.remove('paths');
   }
 }
 
