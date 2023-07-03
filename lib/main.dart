@@ -17,7 +17,6 @@ class MyApp extends StatelessWidget {
         home: DefaultTabController(
       length: 3,
       child: Scaffold(
-        appBar: AppBar(),
         body: TabBarView(
           children: [
             phone_nums.PhoneNums(),
