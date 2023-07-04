@@ -72,18 +72,15 @@ class _PhoneNums extends State<PhoneNums> {
                         child: SizedBox(
                             height: 50, child: CircularProgressIndicator()),
                       );
-                    }
-                    else if (snapshot.hasError){
+                    } else if (snapshot.hasError) {
                       return Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
-                        'Error: ${snapshot.error}',
-                        style: TextStyle(fontSize: 15),
+                          'Error: ${snapshot.error}',
+                          style: TextStyle(fontSize: 15),
                         ),
                       );
-
-                    }
-                    else {
+                    } else {
                       return ListView.builder(
                           itemCount: snapshot.data.length,
                           itemBuilder: (context, index) {
@@ -111,10 +108,10 @@ class _PhoneNums extends State<PhoneNums> {
                                       builder: (context) {
                                         return Center(
                                           child: contact_info_page.ContactInfo(
-                                              phoneNum: contact.phones
-                                                  .toString(),
-                                              personName:
-                                              contact.displayName.toString()),
+                                              phoneNum:
+                                                  contact.phones.toString(),
+                                              personName: contact.displayName
+                                                  .toString()),
                                         );
                                       });
                                 },
@@ -122,8 +119,8 @@ class _PhoneNums extends State<PhoneNums> {
                               const Divider()
                             ]);
                           });
-                        }
-                      },
+                    }
+                  },
                 ),
               ),
             );
@@ -132,19 +129,16 @@ class _PhoneNums extends State<PhoneNums> {
   }
 
   Future<List<Contact>> getPermission() async {
-    Map<Permission, PermissionStatus> statuses = await [
-      Permission.contacts,
-      Permission.phone,
-      Permission.sms].request();
-    var tmp = await Permission.contacts.request();
-    if(tmp.isGranted){
-        return await FastContacts.allContacts;
-    }
-    else{
+    Map<Permission, PermissionStatus> statuses =
+        await [Permission.contacts, Permission.phone, Permission.sms].request();
+    if (statuses[Permission.contacts]!.isGranted) {
+      return await FastContacts.allContacts;
+    } else {
       openAppSettings();
       return [];
     }
   }
+}
 
 class Search extends SearchDelegate<Contact> {
   // x 버튼 : 검색 query 초기화
