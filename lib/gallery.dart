@@ -1,9 +1,12 @@
-import 'package:flutter/material.dart';
 import 'dart:io';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'style.dart';
+import './components/floatingbutton.dart';
 
 class Gallery extends StatefulWidget {
   const Gallery({Key? key}) : super(key: key);
@@ -13,10 +16,6 @@ class Gallery extends StatefulWidget {
 }
 
 class _GalleryState extends State<Gallery> {
-  static const mainColor = Color.fromARGB(255, 149, 150, 208);
-  static const subColor = Color.fromARGB(255, 203, 144, 191);
-  static const lightColor = Color(0xFFF8FAFF);
-  static const darkColor = Color(0xFF353866);
   final ImagePicker _picker = ImagePicker();
   List<XFile> _pickedImgs = [];
 
@@ -30,73 +29,13 @@ class _GalleryState extends State<Gallery> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        floatingActionButton: SpeedDial(
-          animatedIcon: AnimatedIcons.menu_close,
-          visible: true,
-          curve: Curves.bounceIn,
-          backgroundColor: darkColor,
-          // childMargin: const EdgeInsets.all(0),
-          gradient: LinearGradient(
-            colors: [mainColor, subColor],
-            stops: [0, 0.75],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-          ),
-          gradientBoxShape: BoxShape.circle,
-          childrenButtonSize: Size(56, 56),
-          children: [
-            SpeedDialChild(
-              child: Container(
-                width: 56,
-                height: 56,
-                child: const Icon(Icons.add, color: lightColor),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [mainColor, subColor],
-                    stops: [0, 0.75],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
-                ),
-              ),
-              label: "사진 추가하기",
-              labelStyle: const TextStyle(
-                  fontWeight: FontWeight.w500,
-                  color: lightColor,
-                  fontSize: 13.0),
-              backgroundColor: mainColor,
-              labelBackgroundColor: mainColor,
-              onTap: () {
-                _pickImg();
-              }),
-            SpeedDialChild(
-              child: Container(
-                  width: 56,
-                  height: 56,
-                  // padding: EdgeInsets.all(0),
-                  child: const Icon(Icons.remove, color: lightColor),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [mainColor, subColor],
-                      stops: [0, 0.75],
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                    ),
-                  ),
-                ),
-              label: "사진 전부 지우기",
-              backgroundColor: mainColor,
-              labelBackgroundColor: mainColor,
-              labelStyle: const TextStyle(
-                  fontWeight: FontWeight.w500, color: lightColor, fontSize: 13.0),
-              onTap: () {
-                _initImg();
-              },
-            )
-          ],
-        ),
+        backgroundColor: lightColor,
+        floatingActionButton: TwoButtons(
+          _pickImg, _initImg, 
+          Icon(Icons.add, color: lightColor),
+          Icon(Icons.remove, color: lightColor),
+          "사진 추가하기", "사진 전부 지우기")
+        ,
         body: GridView.count(
           primary: false,
           padding: const EdgeInsets.all(2),
@@ -129,22 +68,17 @@ class _GalleryState extends State<Gallery> {
     );
   }
 
-
   void _updatePreference() async {
-    var prefs = await SharedPreferences.getInstance();
-    var imglist = _pickedImgs.map((xf) => xf.path).toList();
+    final prefs = await SharedPreferences.getInstance();
+    final imglist = _pickedImgs.map((xf) => xf.path).toList();
     await prefs.remove('paths');
     prefs.setStringList('paths', imglist);
   }
 
-
-
   Future<void> getImgList() async {
-    var prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
     try{
       var imglist = prefs.getStringList('paths') ?? [];
-      for(final line in imglist){
-      }
       var images = imglist.map((path) => XFile(path)).toList();
       setState(() {
         _pickedImgs = images;
@@ -175,4 +109,3 @@ class _GalleryState extends State<Gallery> {
     await prefs.remove('paths');
   }
 }
-
