@@ -12,18 +12,24 @@ class PhoneNums extends StatefulWidget {
 }
 
 class _PhoneNums extends State<PhoneNums> {
+  static const mainColor = Color.fromARGB(255, 149, 150, 208);
+  static const subColor = Color.fromARGB(255, 203, 144, 191);
+  static const lightColor = Color(0xFFF8FAFF);
+  static const darkColor = Color(0xFF353866);
+
   @override
   void initState() {
     super.initState();
     getPhones();
     getSms();
+    getContacts();
+
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.blue),
       home:
       FutureBuilder(
         future: getContacts(),
@@ -36,6 +42,14 @@ class _PhoneNums extends State<PhoneNums> {
           }
           return Scaffold(
             appBar: AppBar(
+              elevation: 0.0,
+              flexibleSpace: new Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [mainColor, subColor]),
+              ),
+              ),
+
               leading: IconButton(
                 icon: Icon(Icons.menu),
                 onPressed: () {},
@@ -54,7 +68,6 @@ class _PhoneNums extends State<PhoneNums> {
               height: double.infinity,
               child: FutureBuilder(
                 future: getContacts(),
-
                 builder: (context, AsyncSnapshot snapshot) {
                   if (snapshot.data == null) {
                     return const Center(
@@ -69,8 +82,12 @@ class _PhoneNums extends State<PhoneNums> {
                         return Column(children: [
                           ListTile(
                             leading: const CircleAvatar(
+                              backgroundColor: mainColor,
                               radius: 20,
-                              child: Icon(Icons.person),
+                              child: Icon(
+                                Icons.person,
+                                color: Colors.white,
+                              ),
                             ),
                             title: Text(contact.displayName),
                             subtitle: Column(
