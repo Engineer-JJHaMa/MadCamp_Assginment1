@@ -29,7 +29,7 @@
     <uses-permission android:name="android.permission.SEND_SMS"/>
     <uses-permission android:name="android.permission.INTERNET" />
     <application
-        android:label="assignment1"
+        android:label="CGC"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
