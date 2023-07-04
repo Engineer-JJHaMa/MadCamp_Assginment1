@@ -25,8 +25,23 @@ class _PhoneNums extends State<PhoneNums> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.green),
+      theme: ThemeData(primarySwatch: Colors.blue),
       home: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.menu),
+            onPressed: () {},
+          ),
+          title: Text('Contact'),
+          centerTitle: true,
+          actions: [
+            IconButton(
+              onPressed: () {
+                showSearch(context: context, delegate: Search());
+              },
+              icon: Icon(Icons.search),)
+          ],
+        ),
         body: Container(
           height: double.infinity,
           child: FutureBuilder(
@@ -136,6 +151,14 @@ class _PhoneNums extends State<PhoneNums> {
     );
   }
 
+
+
+
+
+
+
+
+
   Future<List<Contact>> getContacts() async {
     bool isGranted = await Permission.contacts.status.isGranted;
 
@@ -182,4 +205,68 @@ class _PhoneNums extends State<PhoneNums> {
     }
   }
 
+}
+
+
+class Search extends SearchDelegate {
+  @override
+  List<Widget> buildActions(BuildContext context){
+    return <Widget>[
+      IconButton(
+          onPressed: () {
+            query = "";
+          },
+          icon: Icon(Icons.close))
+    ];
+  }
+  @override
+  Widget buildLeading(BuildContext context){
+    return IconButton(
+        onPressed: () {
+          Navigator.pop(context);
+        },
+        icon: Icon(Icons.arrow_back),
+    );
+  }
+
+
+  @override
+  // initillize 핅요
+  String selectedResult = '';
+  // 최근 query 저장
+  List<String> recentList = ["tmp1", "tmp2"];
+  // 전화번호부
+  List<String> listExample = ["elem1", "elem2"];
+
+  Widget buildResults(BuildContext context){
+    return Container(
+      child: Center(
+        child: Text(selectedResult)
+,      ),
+    );
+  }
+  @override
+  Widget buildSuggestions(BuildContext context){
+    List<String> suggestionList = [];
+    query.isEmpty
+        ? suggestionList = recentList
+        : suggestionList.addAll(listExample.where(
+        (element) => element.contains(query),
+    ));
+
+    return ListView.builder(
+      itemCount: suggestionList.length,
+      itemBuilder: (context, index){
+        return ListTile(
+          title: Text(
+            suggestionList[index],
+          ),
+          onTap: (){
+            selectedResult = suggestionList[index];
+            showResults(context);
+          },
+        );
+      },
+    );
+  }
 }
