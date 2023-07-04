@@ -4,8 +4,8 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import '../style.dart';
 
 class TwoButtons extends StatelessWidget {
-  final Function bottomOnTap;
-  final Function topOnTap;
+  final VoidCallback bottomOnTap;
+  final VoidCallback topOnTap;
   final Icon bottomIcon;
   final Icon topIcon;
   final String bottomLabel;
@@ -38,7 +38,7 @@ class TwoButtons extends StatelessWidget {
   }
 }
 
-SpeedDialChild _TwoButtonsChild(String label, Icon icon, onTap) {
+SpeedDialChild _TwoButtonsChild(String label, Icon icon, VoidCallback onTap) {
   return SpeedDialChild(
     label: label,
     labelStyle: floatingButtonLabelStyle,
