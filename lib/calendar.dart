@@ -59,130 +59,141 @@ class _CalendarState extends State<Calendar> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      floatingActionButton: SpeedDial(
-        animatedIcon: AnimatedIcons.menu_close,
-        visible: true,
-        curve: Curves.bounceIn,
-        backgroundColor: Colors.indigo.shade900,
-        children: [
-          SpeedDialChild(
-              child: const Icon(Icons.add, color: Colors.white),
-              label: "일정 추가하기",
-              labelStyle: const TextStyle(
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white,
-                  fontSize: 13.0),
+    return SafeArea(
+      child: Scaffold(
+        floatingActionButton: SpeedDial(
+          animatedIcon: AnimatedIcons.menu_close,
+          visible: true,
+          curve: Curves.bounceIn,
+          backgroundColor: Colors.indigo.shade900,
+          childMargin: const EdgeInsets.all(0),
+          children: [
+            SpeedDialChild(
+                // child: const Icon(Icons.add, color: Colors.white),
+                child: Container(
+                  width: double.infinity,
+                  child: const Icon(Icons.add, color: Colors.white),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(colors: [Color(0xFF20BF55), Color(0xFF01BAEF)]),
+                  ),
+                ),
+                label: "일정 추가하기",
+                labelStyle: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                    fontSize: 13.0),
+                backgroundColor: Colors.indigo.shade900,
+                labelBackgroundColor: Colors.indigo.shade900,
+                onTap: () {
+                  _displayTextInputDialog(context, _selectedDay);
+                }),
+            SpeedDialChild(
+              child: const Icon(
+                Icons.remove,
+                color: Colors.white,
+              ),
+              label: "일정 지우기",
               backgroundColor: Colors.indigo.shade900,
               labelBackgroundColor: Colors.indigo.shade900,
+              labelStyle: const TextStyle(
+                  fontWeight: FontWeight.w500, color: Colors.white, fontSize: 13.0),
               onTap: () {
-                _displayTextInputDialog(context, _selectedDay);
-              }),
-          SpeedDialChild(
-            child: const Icon(
-              Icons.remove,
-              color: Colors.white,
-            ),
-            label: "일정 지우기",
-            backgroundColor: Colors.indigo.shade900,
-            labelBackgroundColor: Colors.indigo.shade900,
-            labelStyle: const TextStyle(
-                fontWeight: FontWeight.w500, color: Colors.white, fontSize: 13.0),
-            onTap: () {
-              _displayRemovalDialog(context);
-            },
-          )
-        ],
-      ),
-      body: Column(
-        children: [
-          ValueListenableBuilder<DateTime>(
-            valueListenable: _focusedDay,
-            builder: (context, value, _) {
-              return _CalendarHeader(
-                focusedDay: value,
-                onLeftArrowTap: () {
-                  _pageController.previousPage(
-                    duration: Duration(milliseconds: 300),
-                    curve: Curves.easeOut,
-                  );
-                },
-                onRightArrowTap: () {
-                  _pageController.nextPage(
-                    duration: Duration(milliseconds: 300),
-                    curve: Curves.easeOut,
-                  );
-                },
-              );
-            },
-          ),
-          TableCalendar<Event>(
-            firstDay: kFirstDay,
-            lastDay: kLastDay,
-            focusedDay: _focusedDay.value,
-            headerVisible: false,
-            selectedDayPredicate: (day) {
-              // Use `selectedDayPredicate` to determine which day is currently selected.
-              // If this returns true, then `day` will be marked as selected.
-              // Using `isSameDay` is recommended to disregard
-              // the time-part of compared DateTime objects.
-              return isSameDay(_selectedDay, day);
-            },
-            calendarFormat: _calendarFormat,
-            eventLoader: _getEventsForDay,
-            onDaySelected: _onDaySelected,
-            onCalendarCreated: (controller) => _pageController = controller,
-            onPageChanged: (focusedDay) => _focusedDay.value = focusedDay,
-            onFormatChanged: (format) {
-              if (_calendarFormat != format) {
-                setState(() => _calendarFormat = format);
-              }
-            },
-          ),
-          const SizedBox(height: 8.0),
-          Padding(
-            padding: EdgeInsets.fromLTRB(0, 2, 0, 2),
-            child: Visibility(
-              child: Text("이날의 날씨는 " + (weathers[_selectedDay] ?? "") + " 입니다"),
-              visible: weathers[_selectedDay] != null,
-            ),
-          ),
-          Expanded(
-            child: ValueListenableBuilder<List<Event>>(
-              valueListenable: _selectedEvents,
-              builder: (context, val, _) {
-                return ListView.builder(
-                  itemCount: val.length,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 12.0,
-                        vertical: 4.0,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border.all(),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      child: CheckboxListTile(
-                        value: val[index].ischecked,
-                        title: Text('${val[index]}'),
-                        onChanged: (bool? value) {
-                          setState(() {
-                            val[index].ischecked = value ?? false;
-                            _updatePreference();
-                          });
-                        },
-                        //secondary: const Icon(Icons.hourglass_empty),
-                        selected: true,
-                      ),
+                _displayRemovalDialog(context);
+              },
+            )
+          ],
+        ),
+        body: Column(
+          children: [
+            ValueListenableBuilder<DateTime>(
+              valueListenable: _focusedDay,
+              builder: (context, value, _) {
+                return _CalendarHeader(
+                  focusedDay: value,
+                  onLeftArrowTap: () {
+                    _pageController.previousPage(
+                      duration: Duration(milliseconds: 300),
+                      curve: Curves.easeOut,
+                    );
+                  },
+                  onRightArrowTap: () {
+                    _pageController.nextPage(
+                      duration: Duration(milliseconds: 300),
+                      curve: Curves.easeOut,
                     );
                   },
                 );
               },
             ),
-          ),
-        ],
-      ),
+            TableCalendar<Event>(
+              firstDay: kFirstDay,
+              lastDay: kLastDay,
+              focusedDay: _focusedDay.value,
+              headerVisible: false,
+              selectedDayPredicate: (day) {
+                // Use `selectedDayPredicate` to determine which day is currently selected.
+                // If this returns true, then `day` will be marked as selected.
+                // Using `isSameDay` is recommended to disregard
+                // the time-part of compared DateTime objects.
+                return isSameDay(_selectedDay, day);
+              },
+              calendarFormat: _calendarFormat,
+              eventLoader: _getEventsForDay,
+              onDaySelected: _onDaySelected,
+              onCalendarCreated: (controller) => _pageController = controller,
+              onPageChanged: (focusedDay) => _focusedDay.value = focusedDay,
+              onFormatChanged: (format) {
+                if (_calendarFormat != format) {
+                  setState(() => _calendarFormat = format);
+                }
+              },
+            ),
+            const SizedBox(height: 8.0),
+            Padding(
+              padding: EdgeInsets.fromLTRB(0, 2, 0, 2),
+              child: Visibility(
+                child: Text("이날의 날씨는 " + (weathers[_selectedDay] ?? "") + " 입니다"),
+                visible: weathers[_selectedDay] != null,
+              ),
+            ),
+            Expanded(
+              child: ValueListenableBuilder<List<Event>>(
+                valueListenable: _selectedEvents,
+                builder: (context, val, _) {
+                  return ListView.builder(
+                    itemCount: val.length,
+                    itemBuilder: (context, index) {
+                      return Container(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 12.0,
+                          vertical: 4.0,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(),
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        child: CheckboxListTile(
+                          value: val[index].ischecked,
+                          title: Text('${val[index]}'),
+                          onChanged: (bool? value) {
+                            setState(() {
+                              val[index].ischecked = value ?? false;
+                              _updatePreference();
+                            });
+                          },
+                          //secondary: const Icon(Icons.hourglass_empty),
+                          selected: true,
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      )
     );
   }
 
@@ -381,10 +392,11 @@ class _CalendarState extends State<Calendar> {
     weather.forEach((key, value) {
       debugPrint("k: "+key.toString()+"v: "+value.toString());
     });
-    setState(() {
+    if(this.mounted){
+      setState(() {
       weathers.clear();
       weathers.addAll(weather);
-    });
+    });}
   }
 }
 
