@@ -23,103 +23,102 @@ class _PhoneNums extends State<PhoneNums> {
     getPhones();
     getSms();
     getContacts();
-
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home:
-      FutureBuilder(
-        future: getContacts(),
-        builder: (context, AsyncSnapshot snapshot) {
-          if (snapshot.data == null) {
-            return const Center(
-              child:
-              SizedBox(height: 50, child: CircularProgressIndicator()),
-            );
-          }
-          return Scaffold(
-            appBar: AppBar(
-              elevation: 0.0,
-              flexibleSpace: new Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [mainColor, subColor]),
+      home: FutureBuilder(
+          future: getContacts(),
+          builder: (context, AsyncSnapshot snapshot) {
+            if (snapshot.data == null) {
+              return const Center(
+                child: SizedBox(height: 50, child: CircularProgressIndicator()),
+              );
+            }
+            return Scaffold(
+              appBar: AppBar(
+                elevation: 0.0,
+                flexibleSpace: new Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [mainColor, subColor]),
+                  ),
+                ),
+                leading: IconButton(
+                  icon: Icon(Icons.menu),
+                  onPressed: () {},
+                ),
+                title: Text('Contact'),
+                centerTitle: true,
+                actions: [
+                  IconButton(
+                    onPressed: !snapshot.hasData
+                        ? null
+                        : () {
+                            showSearch(
+                                context: context,
+                                delegate: Search(snapshot.data));
+                          },
+                    icon: Icon(Icons.search),
+                  )
+                ],
               ),
-              ),
-
-              leading: IconButton(
-                icon: Icon(Icons.menu),
-                onPressed: () {},
-              ),
-              title: Text('Contact'),
-              centerTitle: true,
-              actions: [
-                IconButton(
-                  onPressed: !snapshot.hasData ? null : () {
-                    showSearch(context: context, delegate: Search(snapshot.data));
-                  },
-                  icon: Icon(Icons.search),)
-              ],
-            ),
-            body: Container(
-              height: double.infinity,
-              child: FutureBuilder(
-                future: getContacts(),
-                builder: (context, AsyncSnapshot snapshot) {
-                  if (snapshot.data == null) {
-                    return const Center(
-                      child:
-                      SizedBox(height: 50, child: CircularProgressIndicator()),
-                    );
-                  }
-                  return ListView.builder(
-                      itemCount: snapshot.data.length,
-                      itemBuilder: (context, index) {
-                        Contact contact = snapshot.data[index];
-                        return Column(children: [
-                          ListTile(
-                            leading: const CircleAvatar(
-                              backgroundColor: mainColor,
-                              radius: 20,
-                              child: Icon(
-                                Icons.person,
-                                color: Colors.white,
+              body: Container(
+                height: double.infinity,
+                child: FutureBuilder(
+                  future: getContacts(),
+                  builder: (context, AsyncSnapshot snapshot) {
+                    if (snapshot.data == null) {
+                      return const Center(
+                        child: SizedBox(
+                            height: 50, child: CircularProgressIndicator()),
+                      );
+                    }
+                    return ListView.builder(
+                        itemCount: snapshot.data.length,
+                        itemBuilder: (context, index) {
+                          Contact contact = snapshot.data[index];
+                          return Column(children: [
+                            ListTile(
+                              leading: const CircleAvatar(
+                                backgroundColor: mainColor,
+                                radius: 20,
+                                child: Icon(
+                                  Icons.person,
+                                  color: Colors.white,
+                                ),
                               ),
+                              title: Text(contact.displayName),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text((contact.phones).toString()),
+                                ],
+                              ),
+                              onTap: () async {
+                                await showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return Center(
+                                        child: contact_info_page.ContactInfo(
+                                            phoneNum: contact.phones.toString(),
+                                            personName:
+                                                contact.displayName.toString()),
+                                      );
+                                    });
+                              },
                             ),
-                            title: Text(contact.displayName),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text((contact.phones).toString()),
-                              ],
-                            ),
-                            onTap: () async {
-                              await showDialog(
-                                  context: context,
-                                  builder: (context) {
-                                    return Center(
-                                      child: contact_info_page.ContactInfo(
-                                          phoneNum: contact.phones.toString(),
-                                          personName: contact.displayName.toString()),
-                                    );
-                                  });
-                            },
-                          ),
-                          const Divider()
-                        ]);
-                      });
-                },
+                            const Divider()
+                          ]);
+                        });
+                  },
+                ),
               ),
-            ),
-          );
-        }
-      ),
+            );
+          }),
     );
   }
-
 
   Future<List<Contact>> getContacts() async {
     bool isGranted = await Permission.contacts.status.isGranted;
@@ -132,6 +131,7 @@ class _PhoneNums extends State<PhoneNums> {
     }
     return [];
   }
+
   getPhones() async {
     bool isGranted = await Permission.phone.status.isGranted;
     if (!isGranted) {
@@ -149,12 +149,10 @@ class _PhoneNums extends State<PhoneNums> {
   }
 }
 
-
 class Search extends SearchDelegate<Contact> {
-
   // x 버튼 : 검색 query 초기화
   @override
-  List<Widget> buildActions(BuildContext context){
+  List<Widget> buildActions(BuildContext context) {
     return <Widget>[
       IconButton(
           onPressed: () {
@@ -166,12 +164,12 @@ class Search extends SearchDelegate<Contact> {
 
   // <- 버튼: 창 닫기
   @override
-  Widget buildLeading(BuildContext context){
+  Widget buildLeading(BuildContext context) {
     return IconButton(
-        onPressed: () {
-          Navigator.pop(context);
-        },
-        icon: Icon(Icons.arrow_back),
+      onPressed: () {
+        Navigator.pop(context);
+      },
+      icon: Icon(Icons.arrow_back),
     );
   }
 
@@ -183,47 +181,47 @@ class Search extends SearchDelegate<Contact> {
   // 전화번호부 전체 리스트
   List<Contact> contact = [];
   List<Contact> p = [];
-  Search(this.p){
+  Search(this.p) {
     contact = p;
   }
-  Widget buildResults(BuildContext context){
+  Widget buildResults(BuildContext context) {
     return Container(
       child: Center(
-        child: Text(selectedResult)
-,      ),
+        child: Text(selectedResult),
+      ),
     );
   }
 
   // contact 리스트에서 검색해서 반환
   @override
-  Widget buildSuggestions(BuildContext context){
+  Widget buildSuggestions(BuildContext context) {
     List<Contact> suggestionList = [];
     query.isEmpty
         ? suggestionList = contact
-        : suggestionList.addAll(
-          contact.where(
+        : suggestionList.addAll(contact.where(
             (element) => element.displayName.toString().contains(query),
-    ));
+          ));
 
     @override
-    void showResults(BuildContext context, int index){
-      Navigator.push(context, MaterialPageRoute(
-          builder: (context) => contact_info_page.ContactInfo(
-            personName: suggestionList[index].displayName.toString(),
-            phoneNum: suggestionList[index].phones.toString(),
-          ),
-        )
-      );
+    void showResults(BuildContext context, int index) {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => contact_info_page.ContactInfo(
+              personName: suggestionList[index].displayName.toString(),
+              phoneNum: suggestionList[index].phones.toString(),
+            ),
+          ));
     }
 
     return ListView.builder(
       itemCount: suggestionList.length,
-      itemBuilder: (context, index){
+      itemBuilder: (context, index) {
         return ListTile(
           title: Text(
             suggestionList[index].displayName.toString(),
           ),
-          onTap: (){
+          onTap: () {
             selectedResult = suggestionList[index].toString();
             showResults(context, index);
           },
