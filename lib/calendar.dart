@@ -87,32 +87,33 @@ class _CalendarState extends State<Calendar> {
           childrenButtonSize: Size(56, 56),
           children: [
             SpeedDialChild(
-                // child: const Icon(Icons.add, color: lightColor),
-                child: Container(
-                  width: 56,
-                  height: 56,
-                  // padding: EdgeInsets.all(0),
-                  child: const Icon(Icons.add, color: lightColor),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [mainColor, subColor],
-                      stops: [0, 0.75],
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                    ),
+              // child: const Icon(Icons.add, color: lightColor),
+              child: Container(
+                width: 56,
+                height: 56,
+                // padding: EdgeInsets.all(0),
+                child: const Icon(Icons.add, color: lightColor),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [mainColor, subColor],
+                    stops: [0, 0.75],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
                   ),
                 ),
-                label: "일정 추가하기",
-                labelStyle: const TextStyle(
-                    fontWeight: FontWeight.w500,
-                    color: lightColor,
-                    fontSize: 13.0),
-                backgroundColor: Colors.indigo.shade900,
-                labelBackgroundColor: Colors.indigo.shade900,
-                onTap: () {
-                  _displayTextInputDialog(context, _selectedDay);
-                }),
+              ),
+              label: "일정 추가하기",
+              labelStyle: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: lightColor,
+                  fontSize: 13.0),
+              backgroundColor: mainColor,
+              labelBackgroundColor: mainColor,
+              onTap: () {
+                _displayTextInputDialog(context, _selectedDay);
+              },
+            ),
             SpeedDialChild(
               child: Container(
                   width: 56,
@@ -130,14 +131,14 @@ class _CalendarState extends State<Calendar> {
                   ),
                 ),
               label: "일정 지우기",
-              backgroundColor: Colors.indigo.shade900,
-              labelBackgroundColor: Colors.indigo.shade900,
+              backgroundColor: mainColor,
+              labelBackgroundColor: mainColor,
               labelStyle: const TextStyle(
                   fontWeight: FontWeight.w500, color: lightColor, fontSize: 13.0),
               onTap: () {
                 _displayRemovalDialog(context);
               },
-            )
+            ),
           ],
         ),
         body: Column(
