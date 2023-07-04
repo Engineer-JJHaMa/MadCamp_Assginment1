@@ -15,21 +15,15 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
-  static const mainColor = Color(0xFF20BF55);
-  static const subColor = Color(0xFF01BAEF);
+class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin{
+  static const mainColor = Color.fromARGB(255, 149, 150, 208);
+  static const subColor = Color.fromARGB(255, 203, 144, 191);
+  static const lightColor = Color(0xFFF8FAFF);
+  static const darkColor = Color(0xFF353866);
   List<Tab> tabs = [
-    Tab(icon: Icon(Icons.phone, color: Colors.white)),
-    Tab(
-        icon: Icon(
-      Icons.perm_media,
-      color: subColor,
-    )),
-    Tab(
-        icon: Icon(
-      Icons.contact_page,
-      color: subColor,
-    )),
+    Tab(icon: Icon(Icons.phone, color: lightColor)),
+    Tab(icon: Icon(Icons.perm_media, color: subColor,)),
+    Tab(icon: Icon(Icons.contact_page, color: subColor,)),
   ];
   late TabController _tabController;
 
@@ -47,57 +41,31 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    _tabController.addListener(
-      () {
-        if (!_tabController.indexIsChanging) {
-          setState(() {
-            if (_tabController.index == 0) {
-              tabs = [
-                Tab(icon: Icon(Icons.phone, color: Colors.white)),
-                Tab(
-                    icon: Icon(
-                  Icons.perm_media,
-                  color: subColor,
-                )),
-                Tab(
-                    icon: Icon(
-                  Icons.contact_page,
-                  color: subColor,
-                )),
-              ];
-            } else if (_tabController.index == 1) {
-              tabs = [
-                Tab(icon: Icon(Icons.phone, color: mainColor)),
-                Tab(
-                    icon: Icon(
-                  Icons.perm_media,
-                  color: Colors.white,
-                )),
-                Tab(
-                    icon: Icon(
-                  Icons.contact_page,
-                  color: subColor,
-                )),
-              ];
-            } else {
-              tabs = [
-                Tab(icon: Icon(Icons.phone, color: mainColor)),
-                Tab(
-                    icon: Icon(
-                  Icons.perm_media,
-                  color: mainColor,
-                )),
-                Tab(
-                    icon: Icon(
-                  Icons.contact_page,
-                  color: Colors.white,
-                )),
-              ];
-            }
-          });
-        }
-      },
-    );
+    _tabController.addListener(() {
+      if(!_tabController.indexIsChanging){
+        setState(() {
+          if(_tabController.index == 0){
+            tabs = [
+              Tab(icon: Icon(Icons.phone, color: lightColor)),
+              Tab(icon: Icon(Icons.perm_media, color: subColor,)),
+              Tab(icon: Icon(Icons.contact_page, color: subColor,)),
+            ];
+          } else if(_tabController.index == 1) {
+            tabs = [
+              Tab(icon: Icon(Icons.phone, color: mainColor)),
+              Tab(icon: Icon(Icons.perm_media, color: lightColor,)),
+              Tab(icon: Icon(Icons.contact_page, color: subColor,)),
+            ];
+          } else {
+            tabs = [
+              Tab(icon: Icon(Icons.phone, color: mainColor)),
+              Tab(icon: Icon(Icons.perm_media, color: mainColor,)),
+              Tab(icon: Icon(Icons.contact_page, color: lightColor,)),
+            ];
+          }
+        });
+      }
+    },);
     return MaterialApp(
         home: Scaffold(
       body: TabBarView(
@@ -112,12 +80,22 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
         color: Colors.white,
         child: TabBar(
           controller: _tabController,
-          tabs: tabs,
-          unselectedLabelColor: Color(0xFF01BAEF),
-          indicatorSize: TabBarIndicatorSize.tab,
-          indicator: BoxDecoration(
+          children: [
+            phone_nums.PhoneNums(),
+            gallery.Gallery(),
+            calendar.Calendar(),
+          ],
+        ),
+        bottomNavigationBar: Container(
+          color: lightColor,
+          child: TabBar(
+            controller: _tabController,
+            tabs: tabs,
+            unselectedLabelColor: Color(0xFF01BAEF),
+            indicatorSize: TabBarIndicatorSize.tab,
+            indicator: BoxDecoration(
               gradient: LinearGradient(
-                  colors: [Color(0xFF20BF55), Color(0xFF01BAEF)]),
+                  colors: [mainColor, subColor]),
               borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
               color: Colors.redAccent),
         ),

@@ -8,6 +8,7 @@ import 'dart:developer';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:getwidget/getwidget.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,10 +20,18 @@ class Calendar extends StatefulWidget {
 }
 
 class _CalendarState extends State<Calendar> {
+  static const mainColor = Color.fromARGB(255, 149, 150, 208);
+  static const subColor = Color.fromARGB(255, 203, 144, 191);
+  static const lightColor = Color(0xFFF8FAFF);
+  static const darkColor = Color(0xFF353866);
   final ValueNotifier<List<Event>> _selectedEvents = ValueNotifier(List.empty());
   final ValueNotifier<DateTime> _focusedDay = ValueNotifier(DateTime.now());
   DateTime _selectedDay = DateTime.now();
   CalendarFormat _calendarFormat = CalendarFormat.week;
+  final margin = const EdgeInsets.all(6);
+  final padding = const EdgeInsets.all(0);
+  final alignment = Alignment.center;
+  final duration = const Duration(milliseconds: 250);
 
   final TextEditingController _textFieldController = TextEditingController();
   late PageController _pageController;
@@ -59,130 +68,221 @@ class _CalendarState extends State<Calendar> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      floatingActionButton: SpeedDial(
-        animatedIcon: AnimatedIcons.menu_close,
-        visible: true,
-        curve: Curves.bounceIn,
-        backgroundColor: Colors.indigo.shade900,
-        children: [
-          SpeedDialChild(
-              child: const Icon(Icons.add, color: Colors.white),
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: lightColor,
+        floatingActionButton: SpeedDial(
+          animatedIcon: AnimatedIcons.menu_close,
+          visible: true,
+          curve: Curves.bounceIn,
+          backgroundColor: darkColor,
+          // childMargin: const EdgeInsets.all(0),
+          gradient: LinearGradient(
+            colors: [mainColor, subColor],
+            stops: [0, 0.75],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          gradientBoxShape: BoxShape.circle,
+          childrenButtonSize: Size(56, 56),
+          children: [
+            SpeedDialChild(
+              // child: const Icon(Icons.add, color: lightColor),
+              child: Container(
+                width: 56,
+                height: 56,
+                // padding: EdgeInsets.all(0),
+                child: const Icon(Icons.add, color: lightColor),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [mainColor, subColor],
+                    stops: [0, 0.75],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                ),
+              ),
               label: "일정 추가하기",
               labelStyle: const TextStyle(
                   fontWeight: FontWeight.w500,
-                  color: Colors.white,
+                  color: lightColor,
                   fontSize: 13.0),
-              backgroundColor: Colors.indigo.shade900,
-              labelBackgroundColor: Colors.indigo.shade900,
+              backgroundColor: mainColor,
+              labelBackgroundColor: mainColor,
               onTap: () {
                 _displayTextInputDialog(context, _selectedDay);
-              }),
-          SpeedDialChild(
-            child: const Icon(
-              Icons.remove,
-              color: Colors.white,
+              },
             ),
-            label: "일정 지우기",
-            backgroundColor: Colors.indigo.shade900,
-            labelBackgroundColor: Colors.indigo.shade900,
-            labelStyle: const TextStyle(
-                fontWeight: FontWeight.w500, color: Colors.white, fontSize: 13.0),
-            onTap: () {
-              _displayRemovalDialog(context);
-            },
-          )
-        ],
-      ),
-      body: Column(
-        children: [
-          ValueListenableBuilder<DateTime>(
-            valueListenable: _focusedDay,
-            builder: (context, value, _) {
-              return _CalendarHeader(
-                focusedDay: value,
-                onLeftArrowTap: () {
-                  _pageController.previousPage(
-                    duration: Duration(milliseconds: 300),
-                    curve: Curves.easeOut,
-                  );
-                },
-                onRightArrowTap: () {
-                  _pageController.nextPage(
-                    duration: Duration(milliseconds: 300),
-                    curve: Curves.easeOut,
-                  );
-                },
-              );
-            },
-          ),
-          TableCalendar<Event>(
-            firstDay: kFirstDay,
-            lastDay: kLastDay,
-            focusedDay: _focusedDay.value,
-            headerVisible: false,
-            selectedDayPredicate: (day) {
-              // Use `selectedDayPredicate` to determine which day is currently selected.
-              // If this returns true, then `day` will be marked as selected.
-              // Using `isSameDay` is recommended to disregard
-              // the time-part of compared DateTime objects.
-              return isSameDay(_selectedDay, day);
-            },
-            calendarFormat: _calendarFormat,
-            eventLoader: _getEventsForDay,
-            onDaySelected: _onDaySelected,
-            onCalendarCreated: (controller) => _pageController = controller,
-            onPageChanged: (focusedDay) => _focusedDay.value = focusedDay,
-            onFormatChanged: (format) {
-              if (_calendarFormat != format) {
-                setState(() => _calendarFormat = format);
-              }
-            },
-          ),
-          const SizedBox(height: 8.0),
-          Padding(
-            padding: EdgeInsets.fromLTRB(0, 2, 0, 2),
-            child: Visibility(
-              child: Text("이날의 날씨는 " + (weathers[_selectedDay] ?? "") + " 입니다"),
-              visible: weathers[_selectedDay] != null,
+            SpeedDialChild(
+              child: Container(
+                  width: 56,
+                  height: 56,
+                  // padding: EdgeInsets.all(0),
+                  child: const Icon(Icons.remove, color: lightColor),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: [mainColor, subColor],
+                      stops: [0, 0.75],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                  ),
+                ),
+              label: "일정 지우기",
+              backgroundColor: mainColor,
+              labelBackgroundColor: mainColor,
+              labelStyle: const TextStyle(
+                  fontWeight: FontWeight.w500, color: lightColor, fontSize: 13.0),
+              onTap: () {
+                _displayRemovalDialog(context);
+              },
             ),
-          ),
-          Expanded(
-            child: ValueListenableBuilder<List<Event>>(
-              valueListenable: _selectedEvents,
-              builder: (context, val, _) {
-                return ListView.builder(
-                  itemCount: val.length,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 12.0,
-                        vertical: 4.0,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border.all(),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      child: CheckboxListTile(
-                        value: val[index].ischecked,
-                        title: Text('${val[index]}'),
-                        onChanged: (bool? value) {
-                          setState(() {
-                            val[index].ischecked = value ?? false;
-                            _updatePreference();
-                          });
-                        },
-                        //secondary: const Icon(Icons.hourglass_empty),
-                        selected: true,
-                      ),
+          ],
+        ),
+        body: Column(
+          children: [
+            ValueListenableBuilder<DateTime>(
+              valueListenable: _focusedDay,
+              builder: (context, value, _) {
+                return _CalendarHeader(
+                  focusedDay: value,
+                  onLeftArrowTap: () {
+                    _pageController.previousPage(
+                      duration: Duration(milliseconds: 300),
+                      curve: Curves.easeOut,
+                    );
+                  },
+                  onRightArrowTap: () {
+                    _pageController.nextPage(
+                      duration: Duration(milliseconds: 300),
+                      curve: Curves.easeOut,
                     );
                   },
                 );
               },
             ),
-          ),
-        ],
-      ),
+            TableCalendar<Event>(
+              firstDay: kFirstDay,
+              lastDay: kLastDay,
+              focusedDay: _focusedDay.value,
+              headerVisible: false,
+              holidayPredicate: (DateTime day) {
+                return ((day.weekday == 6) | (day.weekday == 7)) & (day.month == _focusedDay.value.month);
+              },
+              selectedDayPredicate: (day) {
+                // Use `selectedDayPredicate` to determine which day is currently selected.
+                // If this returns true, then `day` will be marked as selected.
+                // Using `isSameDay` is recommended to disregard
+                // the time-part of compared DateTime objects.
+                return isSameDay(_selectedDay, day);
+              },
+              calendarFormat: _calendarFormat,
+              eventLoader: _getEventsForDay,
+              onDaySelected: _onDaySelected,
+              onCalendarCreated: (controller) => _pageController = controller,
+              onPageChanged: (focusedDay) => _focusedDay.value = focusedDay,
+              onFormatChanged: (format) {
+                if (_calendarFormat != format) {
+                  setState(() => _calendarFormat = format);
+                }
+              },
+              calendarStyle: CalendarStyle(
+                holidayDecoration: const BoxDecoration(
+                  border: Border.fromBorderSide(
+                    BorderSide(color: subColor, width: 1.4),
+                  ),
+                  shape: BoxShape.circle,
+                ),
+                holidayTextStyle: const TextStyle(color: subColor),
+                selectedDecoration: BoxDecoration(
+                  // gradient: LinearGradient(
+                  //   colors: [mainColor, subColor],
+                  //   stops: [0, 0.5],
+                  // ),
+                  color: subColor,
+                  shape: BoxShape.circle,
+
+                ),
+                todayDecoration: BoxDecoration(
+                  color: subColor.withOpacity(0.5),
+                  shape: BoxShape.circle,
+                ),
+                markerDecoration: BoxDecoration(
+                  color: darkColor,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8.0),
+            Padding(
+              padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+              child: Visibility(
+                child: Text("\u{1F324} 이날의 날씨는 " + (weathers[_selectedDay] ?? "") + " 입니다 \u{1F327}", textScaleFactor: 1.2,),
+                visible: weathers[_selectedDay] != null,
+              ),
+            ),
+            Expanded(
+              child: ValueListenableBuilder<List<Event>>(
+                valueListenable: _selectedEvents,
+                builder: (context, val, _) {
+                  return ListView.builder(
+                    itemCount: val.length,
+                    itemBuilder: (context, index) {
+                      return Container(
+                        // decoration: BoxDecoration(
+                        //   border: Border.all(color: darkColor),
+                        //   borderRadius: BorderRadius.circular(20),
+                        // ),
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 12.0,
+                          vertical: 0,
+                        ),
+                        child: GFCheckboxListTile(
+                          value: val[index].ischecked,
+                          titleText: val[index].toString(),
+                          onChanged: (bool? value) {
+                            setState(() {
+                              val[index].ischecked = value ?? false;
+                              _updatePreference();
+                            });
+                          },
+                          size: 25,
+                          margin: EdgeInsets.all(3),
+                          padding: EdgeInsets.all(10),
+                          color: lightColor,
+                          activeBgColor: subColor,
+                          activeBorderColor: lightColor,
+                          inactiveBorderColor: lightColor,
+                          type: GFCheckboxType.circle,
+                          activeIcon: Icon(
+                            Icons.check,
+                            size: 16,
+                            color: lightColor,
+                          ),
+                        ),
+                        // child: CheckboxListTile(
+                        //   value: val[index].ischecked,
+                        //   title: Text('${val[index]}'),
+                        //   onChanged: (bool? value) {
+                        //     setState(() {
+                        //       val[index].ischecked = value ?? false;
+                        //       _updatePreference();
+                        //     });
+                        //   },
+                        //   //secondary: const Icon(Icons.hourglass_empty),
+                        //   selected: true,
+                        // ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      )
     );
   }
 
@@ -381,10 +481,11 @@ class _CalendarState extends State<Calendar> {
     weather.forEach((key, value) {
       debugPrint("k: "+key.toString()+"v: "+value.toString());
     });
-    setState(() {
+    if(this.mounted){
+      setState(() {
       weathers.clear();
       weathers.addAll(weather);
-    });
+    });}
   }
 }
 
