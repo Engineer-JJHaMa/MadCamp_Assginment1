@@ -20,9 +20,7 @@ class _PhoneNums extends State<PhoneNums> {
   @override
   void initState() {
     super.initState();
-    getPhones();
-    getSms();
-    getContacts();
+    getPermission();
   }
 
   @override
@@ -30,7 +28,7 @@ class _PhoneNums extends State<PhoneNums> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: FutureBuilder(
-          future: getContacts(),
+          future: getPermission(),
           builder: (context, AsyncSnapshot snapshot) {
             if (snapshot.data == null) {
               return const Center(
@@ -67,52 +65,65 @@ class _PhoneNums extends State<PhoneNums> {
               body: Container(
                 height: double.infinity,
                 child: FutureBuilder(
-                  future: getContacts(),
+                  future: getPermission(),
                   builder: (context, AsyncSnapshot snapshot) {
-                    if (snapshot.data == null) {
+                    if (snapshot.hasData == false) {
                       return const Center(
                         child: SizedBox(
                             height: 50, child: CircularProgressIndicator()),
                       );
                     }
-                    return ListView.builder(
-                        itemCount: snapshot.data.length,
-                        itemBuilder: (context, index) {
-                          Contact contact = snapshot.data[index];
-                          return Column(children: [
-                            ListTile(
-                              leading: const CircleAvatar(
-                                backgroundColor: mainColor,
-                                radius: 20,
-                                child: Icon(
-                                  Icons.person,
-                                  color: Colors.white,
+                    else if (snapshot.hasError){
+                      return Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                        'Error: ${snapshot.error}',
+                        style: TextStyle(fontSize: 15),
+                        ),
+                      );
+
+                    }
+                    else {
+                      return ListView.builder(
+                          itemCount: snapshot.data.length,
+                          itemBuilder: (context, index) {
+                            Contact contact = snapshot.data[index];
+                            return Column(children: [
+                              ListTile(
+                                leading: const CircleAvatar(
+                                  backgroundColor: mainColor,
+                                  radius: 20,
+                                  child: Icon(
+                                    Icons.person,
+                                    color: Colors.white,
+                                  ),
                                 ),
+                                title: Text(contact.displayName),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text((contact.phones).toString()),
+                                  ],
+                                ),
+                                onTap: () async {
+                                  await showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return Center(
+                                          child: contact_info_page.ContactInfo(
+                                              phoneNum: contact.phones
+                                                  .toString(),
+                                              personName:
+                                              contact.displayName.toString()),
+                                        );
+                                      });
+                                },
                               ),
-                              title: Text(contact.displayName),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text((contact.phones).toString()),
-                                ],
-                              ),
-                              onTap: () async {
-                                await showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return Center(
-                                        child: contact_info_page.ContactInfo(
-                                            phoneNum: contact.phones.toString(),
-                                            personName:
-                                                contact.displayName.toString()),
-                                      );
-                                    });
-                              },
-                            ),
-                            const Divider()
-                          ]);
-                        });
-                  },
+                              const Divider()
+                            ]);
+                          });
+                        }
+                      },
                 ),
               ),
             );
@@ -120,34 +131,20 @@ class _PhoneNums extends State<PhoneNums> {
     );
   }
 
-  Future<List<Contact>> getContacts() async {
-    bool isGranted = await Permission.contacts.status.isGranted;
-
-    if (!isGranted) {
-      isGranted = await Permission.contacts.request().isGranted;
+  Future<List<Contact>> getPermission() async {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.contacts,
+      Permission.phone,
+      Permission.sms].request();
+    var tmp = await Permission.contacts.request();
+    if(tmp.isGranted){
+        return await FastContacts.allContacts;
     }
-    if (isGranted) {
-      return await FastContacts.allContacts;
+    else{
+      openAppSettings();
+      return [];
     }
-    return [];
   }
-
-  getPhones() async {
-    bool isGranted = await Permission.phone.status.isGranted;
-    if (!isGranted) {
-      isGranted = await Permission.phone.request().isGranted;
-    }
-    return [];
-  }
-
-  getSms() async {
-    bool isGranted = await Permission.sms.status.isGranted;
-    if (!isGranted) {
-      isGranted = await Permission.sms.request().isGranted;
-    }
-    return [];
-  }
-}
 
 class Search extends SearchDelegate<Contact> {
   // x 버튼 : 검색 query 초기화
