@@ -8,6 +8,7 @@ import 'dart:developer';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:getwidget/getwidget.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,10 +20,18 @@ class Calendar extends StatefulWidget {
 }
 
 class _CalendarState extends State<Calendar> {
+  static const mainColor = Color.fromARGB(255, 149, 150, 208);
+  static const subColor = Color.fromARGB(255, 203, 144, 191);
+  static const lightColor = Color(0xFFF8FAFF);
+  static const darkColor = Color(0xFF353866);
   final ValueNotifier<List<Event>> _selectedEvents = ValueNotifier(List.empty());
   final ValueNotifier<DateTime> _focusedDay = ValueNotifier(DateTime.now());
   DateTime _selectedDay = DateTime.now();
   CalendarFormat _calendarFormat = CalendarFormat.week;
+  final margin = const EdgeInsets.all(6);
+  final padding = const EdgeInsets.all(0);
+  final alignment = Alignment.center;
+  final duration = const Duration(milliseconds: 250);
 
   final TextEditingController _textFieldController = TextEditingController();
   late PageController _pageController;
@@ -61,27 +70,43 @@ class _CalendarState extends State<Calendar> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        backgroundColor: lightColor,
         floatingActionButton: SpeedDial(
           animatedIcon: AnimatedIcons.menu_close,
           visible: true,
           curve: Curves.bounceIn,
-          backgroundColor: Colors.indigo.shade900,
-          childMargin: const EdgeInsets.all(0),
+          backgroundColor: darkColor,
+          // childMargin: const EdgeInsets.all(0),
+          gradient: LinearGradient(
+            colors: [mainColor, subColor],
+            stops: [0, 0.75],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          gradientBoxShape: BoxShape.circle,
+          childrenButtonSize: Size(56, 56),
           children: [
             SpeedDialChild(
-                // child: const Icon(Icons.add, color: Colors.white),
+                // child: const Icon(Icons.add, color: lightColor),
                 child: Container(
-                  width: double.infinity,
-                  child: const Icon(Icons.add, color: Colors.white),
+                  width: 56,
+                  height: 56,
+                  // padding: EdgeInsets.all(0),
+                  child: const Icon(Icons.add, color: lightColor),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: LinearGradient(colors: [Color(0xFF20BF55), Color(0xFF01BAEF)]),
+                    gradient: LinearGradient(
+                      colors: [mainColor, subColor],
+                      stops: [0, 0.75],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
                   ),
                 ),
                 label: "일정 추가하기",
                 labelStyle: const TextStyle(
                     fontWeight: FontWeight.w500,
-                    color: Colors.white,
+                    color: lightColor,
                     fontSize: 13.0),
                 backgroundColor: Colors.indigo.shade900,
                 labelBackgroundColor: Colors.indigo.shade900,
@@ -89,15 +114,26 @@ class _CalendarState extends State<Calendar> {
                   _displayTextInputDialog(context, _selectedDay);
                 }),
             SpeedDialChild(
-              child: const Icon(
-                Icons.remove,
-                color: Colors.white,
-              ),
+              child: Container(
+                  width: 56,
+                  height: 56,
+                  // padding: EdgeInsets.all(0),
+                  child: const Icon(Icons.remove, color: lightColor),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: [mainColor, subColor],
+                      stops: [0, 0.75],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                  ),
+                ),
               label: "일정 지우기",
               backgroundColor: Colors.indigo.shade900,
               labelBackgroundColor: Colors.indigo.shade900,
               labelStyle: const TextStyle(
-                  fontWeight: FontWeight.w500, color: Colors.white, fontSize: 13.0),
+                  fontWeight: FontWeight.w500, color: lightColor, fontSize: 13.0),
               onTap: () {
                 _displayRemovalDialog(context);
               },
@@ -131,6 +167,9 @@ class _CalendarState extends State<Calendar> {
               lastDay: kLastDay,
               focusedDay: _focusedDay.value,
               headerVisible: false,
+              holidayPredicate: (DateTime day) {
+                return ((day.weekday == 6) | (day.weekday == 7)) & (day.month == _focusedDay.value.month);
+              },
               selectedDayPredicate: (day) {
                 // Use `selectedDayPredicate` to determine which day is currently selected.
                 // If this returns true, then `day` will be marked as selected.
@@ -148,12 +187,38 @@ class _CalendarState extends State<Calendar> {
                   setState(() => _calendarFormat = format);
                 }
               },
+              calendarStyle: CalendarStyle(
+                holidayDecoration: const BoxDecoration(
+                  border: Border.fromBorderSide(
+                    BorderSide(color: subColor, width: 1.4),
+                  ),
+                  shape: BoxShape.circle,
+                ),
+                holidayTextStyle: const TextStyle(color: subColor),
+                selectedDecoration: BoxDecoration(
+                  // gradient: LinearGradient(
+                  //   colors: [mainColor, subColor],
+                  //   stops: [0, 0.5],
+                  // ),
+                  color: subColor,
+                  shape: BoxShape.circle,
+
+                ),
+                todayDecoration: BoxDecoration(
+                  color: subColor.withOpacity(0.5),
+                  shape: BoxShape.circle,
+                ),
+                markerDecoration: BoxDecoration(
+                  color: darkColor,
+                  shape: BoxShape.circle,
+                ),
+              ),
             ),
             const SizedBox(height: 8.0),
             Padding(
-              padding: EdgeInsets.fromLTRB(0, 2, 0, 2),
+              padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
               child: Visibility(
-                child: Text("이날의 날씨는 " + (weathers[_selectedDay] ?? "") + " 입니다"),
+                child: Text("\u{1F324} 이날의 날씨는 " + (weathers[_selectedDay] ?? "") + " 입니다 \u{1F327}", textScaleFactor: 1.2,),
                 visible: weathers[_selectedDay] != null,
               ),
             ),
@@ -165,26 +230,49 @@ class _CalendarState extends State<Calendar> {
                     itemCount: val.length,
                     itemBuilder: (context, index) {
                       return Container(
+                        // decoration: BoxDecoration(
+                        //   border: Border.all(color: darkColor),
+                        //   borderRadius: BorderRadius.circular(20),
+                        // ),
                         margin: const EdgeInsets.symmetric(
                           horizontal: 12.0,
-                          vertical: 4.0,
+                          vertical: 0,
                         ),
-                        decoration: BoxDecoration(
-                          border: Border.all(),
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        child: CheckboxListTile(
+                        child: GFCheckboxListTile(
                           value: val[index].ischecked,
-                          title: Text('${val[index]}'),
+                          titleText: val[index].toString(),
                           onChanged: (bool? value) {
                             setState(() {
                               val[index].ischecked = value ?? false;
                               _updatePreference();
                             });
                           },
-                          //secondary: const Icon(Icons.hourglass_empty),
-                          selected: true,
+                          size: 25,
+                          margin: EdgeInsets.all(3),
+                          padding: EdgeInsets.all(10),
+                          color: lightColor,
+                          activeBgColor: subColor,
+                          activeBorderColor: lightColor,
+                          inactiveBorderColor: lightColor,
+                          type: GFCheckboxType.circle,
+                          activeIcon: Icon(
+                            Icons.check,
+                            size: 16,
+                            color: lightColor,
+                          ),
                         ),
+                        // child: CheckboxListTile(
+                        //   value: val[index].ischecked,
+                        //   title: Text('${val[index]}'),
+                        //   onChanged: (bool? value) {
+                        //     setState(() {
+                        //       val[index].ischecked = value ?? false;
+                        //       _updatePreference();
+                        //     });
+                        //   },
+                        //   //secondary: const Icon(Icons.hourglass_empty),
+                        //   selected: true,
+                        // ),
                       );
                     },
                   );

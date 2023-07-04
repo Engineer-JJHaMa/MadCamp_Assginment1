@@ -16,10 +16,12 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin{
-  static const mainColor = Color(0xFF20BF55);
-  static const subColor = Color(0xFF01BAEF);
+  static const mainColor = Color.fromARGB(255, 149, 150, 208);
+  static const subColor = Color.fromARGB(255, 203, 144, 191);
+  static const lightColor = Color(0xFFF8FAFF);
+  static const darkColor = Color(0xFF353866);
   List<Tab> tabs = [
-    Tab(icon: Icon(Icons.phone, color: Colors.white)),
+    Tab(icon: Icon(Icons.phone, color: lightColor)),
     Tab(icon: Icon(Icons.perm_media, color: subColor,)),
     Tab(icon: Icon(Icons.contact_page, color: subColor,)),
   ];
@@ -44,21 +46,21 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin{
         setState(() {
           if(_tabController.index == 0){
             tabs = [
-              Tab(icon: Icon(Icons.phone, color: Colors.white)),
+              Tab(icon: Icon(Icons.phone, color: lightColor)),
               Tab(icon: Icon(Icons.perm_media, color: subColor,)),
               Tab(icon: Icon(Icons.contact_page, color: subColor,)),
             ];
           } else if(_tabController.index == 1) {
             tabs = [
               Tab(icon: Icon(Icons.phone, color: mainColor)),
-              Tab(icon: Icon(Icons.perm_media, color: Colors.white,)),
+              Tab(icon: Icon(Icons.perm_media, color: lightColor,)),
               Tab(icon: Icon(Icons.contact_page, color: subColor,)),
             ];
           } else {
             tabs = [
               Tab(icon: Icon(Icons.phone, color: mainColor)),
               Tab(icon: Icon(Icons.perm_media, color: mainColor,)),
-              Tab(icon: Icon(Icons.contact_page, color: Colors.white,)),
+              Tab(icon: Icon(Icons.contact_page, color: lightColor,)),
             ];
           }
         });
@@ -75,7 +77,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin{
           ],
         ),
         bottomNavigationBar: Container(
-          color: Colors.white,
+          color: lightColor,
           child: TabBar(
             controller: _tabController,
             tabs: tabs,
@@ -83,7 +85,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin{
             indicatorSize: TabBarIndicatorSize.tab,
             indicator: BoxDecoration(
               gradient: LinearGradient(
-                  colors: [Color(0xFF20BF55), Color(0xFF01BAEF)]),
+                  colors: [mainColor, subColor]),
               borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
               color: Colors.redAccent
             ),
