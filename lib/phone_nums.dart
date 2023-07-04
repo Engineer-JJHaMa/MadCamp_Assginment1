@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:fast_contacts/fast_contacts.dart';
-import 'package:url_launcher/url_launcher_string.dart';
-
 import 'package:flutter/foundation.dart';
+import 'package:assignment1/contact_info_page.dart' as contact_info_page;
 
 class PhoneNums extends StatefulWidget {
   PhoneNums({Key? key}) : super(key: key);
@@ -85,67 +84,9 @@ class _PhoneNums extends State<PhoneNums> {
                                   context: context,
                                   builder: (context) {
                                     return Center(
-                                      child: SizedBox(
-                                        height:240,
-                                        child: Scaffold(
-                                          appBar: AppBar(
-                                            leading: const CircleAvatar(
-                                              radius: 20,
-                                              child: Icon(Icons.person),
-                                            ),
-                                            title: Text(contact.displayName),
-                                          ),
-                                          body: Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                            children: <Widget>[
-                                              MaterialButton(
-                                                onPressed: () {
-                                                  makePhoneCall((contact.phones).toString());
-                                                },
-                                                shape: CircleBorder(),
-                                                child: Icon(
-                                                  Icons.phone,
-                                                  size: 20,
-                                                ),
-                                                color: Colors.greenAccent,
-                                                textColor: Colors.white,
-                                              ),
-                                              MaterialButton(
-                                                onPressed: () {
-                                                  makeSms((contact.phones).toString());
-                                                },
-                                                shape: CircleBorder(),
-                                                child: Icon(
-                                                  Icons.message,
-                                                  size: 20,
-                                                ),
-                                                color: Colors.greenAccent,
-                                                textColor: Colors.white,
-                                              ),
-                                              MaterialButton(
-                                                onPressed: () {},
-                                                shape: CircleBorder(),
-                                                child: Icon(
-                                                  Icons.videocam,
-                                                  size: 20,
-                                                ),
-                                                color: Colors.greenAccent,
-                                                textColor: Colors.white,
-                                              ),
-                                              MaterialButton(
-                                                onPressed: () {},
-                                                shape: CircleBorder(),
-                                                child: Icon(
-                                                  Icons.info,
-                                                  size: 20,
-                                                ),
-                                                color: Colors.greenAccent,
-                                                textColor: Colors.white,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
+                                      child: contact_info_page.ContactInfo(
+                                          phoneNum: contact.phones.toString(),
+                                          personName: contact.displayName.toString()),
                                     );
                                   });
                             },
@@ -161,14 +102,6 @@ class _PhoneNums extends State<PhoneNums> {
       ),
     );
   }
-
-
-
-
-
-
-
-
 
 
   Future<List<Contact>> getContacts() async {
@@ -197,26 +130,6 @@ class _PhoneNums extends State<PhoneNums> {
     }
     return [];
   }
-
-  void makePhoneCall(String url) async {
-    String parsedUrl = url.substring(1, url.length - 1);
-    if (await canLaunchUrlString('tel:$parsedUrl')) {
-      await launchUrlString('tel:$parsedUrl');
-    }
-    else {
-      throw 'cannot call';
-    }
-  }
-  void makeSms(String url) async {
-    String parsedUrl = url.substring(1, url.length - 1);
-    if (await canLaunchUrlString('sms:$parsedUrl')) {
-      await launchUrlString('sms:$parsedUrl');
-    }
-    else {
-      throw 'cannot send message';
-    }
-  }
-
 }
 
 
@@ -275,6 +188,17 @@ class Search extends SearchDelegate<Contact> {
             (element) => element.displayName.toString().contains(query),
     ));
 
+    @override
+    void showResults(BuildContext context, int index){
+      Navigator.push(context, MaterialPageRoute(
+          builder: (context) => contact_info_page.ContactInfo(
+            personName: suggestionList[index].displayName.toString(),
+            phoneNum: suggestionList[index].phones.toString(),
+          ),
+        )
+      );
+    }
+
     return ListView.builder(
       itemCount: suggestionList.length,
       itemBuilder: (context, index){
@@ -284,7 +208,7 @@ class Search extends SearchDelegate<Contact> {
           ),
           onTap: (){
             selectedResult = suggestionList[index].toString();
-            showResults(context);
+            showResults(context, index);
           },
         );
       },
