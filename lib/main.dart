@@ -67,18 +67,8 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin{
       }
     },);
     return MaterialApp(
-        home: Scaffold(
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          phone_nums.PhoneNums(),
-          gallery.Gallery(),
-          calendar.Calendar(),
-        ],
-      ),
-      bottomNavigationBar: Container(
-        color: Colors.white,
-        child: TabBar(
+      home: Scaffold(
+        body: TabBarView(
           controller: _tabController,
           children: [
             phone_nums.PhoneNums(),
@@ -97,9 +87,11 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin{
               gradient: LinearGradient(
                   colors: [mainColor, subColor]),
               borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
-              color: Colors.redAccent),
+              color: Colors.redAccent
+            ),
+          ),
         ),
-      ),
-    ));
+      )
+    );
   }
 }
