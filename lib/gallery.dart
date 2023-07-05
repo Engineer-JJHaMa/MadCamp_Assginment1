@@ -67,6 +67,7 @@ class _GalleryState extends State<Gallery> {
                                 height: double.infinity,
                                 File(xf.path),
                                 fit: BoxFit.cover,
+                                filterQuality: FilterQuality.none,
                               ))
                       ),
                       Positioned(
