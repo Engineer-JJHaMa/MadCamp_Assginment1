@@ -4,6 +4,8 @@ import 'package:fast_contacts/fast_contacts.dart';
 import 'package:flutter/foundation.dart';
 import 'package:assignment1/contact_info_page.dart' as contact_info_page;
 
+import 'style.dart';
+
 class PhoneNums extends StatefulWidget {
   PhoneNums({Key? key}) : super(key: key);
 
@@ -12,11 +14,6 @@ class PhoneNums extends StatefulWidget {
 }
 
 class _PhoneNums extends State<PhoneNums> {
-  static const mainColor = Color.fromARGB(255, 149, 150, 208);
-  static const subColor = Color.fromARGB(255, 203, 144, 191);
-  static const lightColor = Color(0xFFF8FAFF);
-  static const darkColor = Color(0xFF353866);
-
   @override
   void initState() {
     super.initState();
@@ -140,6 +137,21 @@ class _PhoneNums extends State<PhoneNums> {
   }
 }
 
+Future<void> showContactInfo(BuildContext context, Contact contact) {
+  return showDialog(
+    context: context,
+    builder: (context) {
+      return Center(
+        child: contact_info_page.ContactInfo(
+          phoneNum:
+              contact.phones.toString(),
+          personName: contact.displayName
+              .toString()),
+      );
+    }
+  );
+}
+
 class Search extends SearchDelegate<Contact> {
   // x 버튼 : 검색 query 초기화
   @override
@@ -166,7 +178,7 @@ class Search extends SearchDelegate<Contact> {
 
   // 검색 결과 띄우기(함수 호출 시 전체 덮는 창)
   @override
-  String selectedResult = '';
+  Contact? selectedResult;
   // 최근 query 저장
   List<String> recentList = ["tmp1", "tmp2"];
   // 전화번호부 전체 리스트
@@ -178,7 +190,7 @@ class Search extends SearchDelegate<Contact> {
   Widget buildResults(BuildContext context) {
     return Container(
       child: Center(
-        child: Text(selectedResult),
+        child: Text(selectedResult.toString()),
       ),
     );
   }
@@ -213,8 +225,9 @@ class Search extends SearchDelegate<Contact> {
             suggestionList[index].displayName.toString(),
           ),
           onTap: () {
-            selectedResult = suggestionList[index].toString();
-            showResults(context, index);
+            selectedResult = suggestionList[index];
+            showContactInfo(context, suggestionList[index]);
+            // showResults(context, index);
           },
         );
       },
