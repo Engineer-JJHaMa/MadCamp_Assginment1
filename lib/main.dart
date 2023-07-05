@@ -5,6 +5,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:fast_contacts/fast_contacts.dart';
 
+import 'style.dart';
+
 void main() async {
   await dotenv.load(fileName: "assets/.env");
   runApp(MyApp());
@@ -16,10 +18,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin{
-  static const mainColor = Color.fromARGB(255, 149, 150, 208);
-  static const subColor = Color.fromARGB(255, 203, 144, 191);
-  static const lightColor = Color(0xFFF8FAFF);
-  static const darkColor = Color(0xFF353866);
   List<Tab> tabs = [
     Tab(icon: Icon(Icons.phone, color: lightColor)),
     Tab(icon: Icon(Icons.perm_media, color: subColor,)),
@@ -81,13 +79,11 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin{
           child: TabBar(
             controller: _tabController,
             tabs: tabs,
-            unselectedLabelColor: Color(0xFF01BAEF),
             indicatorSize: TabBarIndicatorSize.tab,
             indicator: BoxDecoration(
               gradient: LinearGradient(
                   colors: [mainColor, subColor]),
               borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
-              color: Colors.redAccent
             ),
           ),
         ),
