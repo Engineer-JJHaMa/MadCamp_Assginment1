@@ -4,9 +4,17 @@ import 'package:table_calendar/table_calendar.dart';
 
 const mainColor   = Color(0xFF8196D0);
 const subColor    = Color(0xFFCB90BF);
-const lightColor  = Color(0xFFD2DCF7);
+const lightColor  = Color.fromARGB(255, 235, 239, 250);
 const darkColor   = Color(0xFF353866);
 const subColorHalfOpacity = Color.fromRGBO(0xCB, 0x90, 0xBF, 0.5);
+
+const contactErrMsgPadding = EdgeInsets.all(8.0);
+const contactErrMsgFontSize = TextStyle(fontSize: 15);
+
+const contactAppBarDecoration = BoxDecoration(
+  gradient: LinearGradient(colors: [mainColor, subColor]),
+);
+const contactListHeight = double.infinity;
 
 const floatingButtonShape = BoxShape.circle;
 const floatingButtonSize = Size(56, 56);
