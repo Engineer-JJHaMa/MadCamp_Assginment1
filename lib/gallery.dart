@@ -1,9 +1,9 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:assignment1/gallery_picture.dart' as gallery_picture;
 
 import './components/floatingbutton.dart';
 import './style.dart';
@@ -42,27 +42,49 @@ class _GalleryState extends State<Gallery> {
           crossAxisSpacing: 2,
           mainAxisSpacing: 2,
           crossAxisCount: 3,
-          children: _pickedImgs.map((xf) => Container(
-            child: Stack(
-              fit: StackFit.expand,
-              children: [Image.file(
-                File(xf.path),
-                fit: BoxFit.cover,
+          children: _pickedImgs.asMap().map((i, xf) => MapEntry(i,
+              Container(
+                child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Container(
+                          child: TextButton(
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => gallery_picture.GalleryPicture(
+                                        imgList: _pickedImgs,
+                                        imgIndex: i,
+                                      ),
+                                    ));
+                              },
+                              child: Image.file(
+                                width: double.infinity,
+                                height: double.infinity,
+                                File(xf.path),
+                                fit: BoxFit.cover,
+                              ))
+                      ),
+                      Positioned(
+                          right: 1,
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _dltImg(xf);
+                              });
+                            },
+                            child: const Icon(Icons.cancel, color: mainColor),
+                          )
+                      )
+                    ]
                 ),
-                Positioned(
-                  right: 1,
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _dltImg(xf);
-                      });
-                    },
-                    child: const Icon(Icons.cancel, color: mainColor),
-                  )
-                )
-              ]
-            ),
-          )).toList(),
+              ))).values.toList(),
+          // _pickedImgs.map((xf) =>
+
         ),
       ),
     );
