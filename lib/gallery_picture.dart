@@ -9,10 +9,9 @@ import 'package:carousel_slider/carousel_slider.dart';
 
 
 class GalleryPicture extends StatefulWidget {
-  GalleryPicture({Key? key, required this.imgList, required this.imgIndex})
+  GalleryPicture({Key? key, required this.imgList})
       : super(key: key);
   final List<XFile> imgList;
-  int imgIndex;
   @override
   State<GalleryPicture> createState() => _GalleryPictureState();
 }
@@ -42,7 +41,6 @@ class _GalleryPictureState extends State<GalleryPicture>{
         body: Column(
           children: [
             SizedBox(
-            height: 300,
             child: Stack(
               children: [
                 sliderWidget(),
