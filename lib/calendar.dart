@@ -5,9 +5,9 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:colorful_safe_area/colorful_safe_area.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -62,7 +62,8 @@ class _CalendarState extends State<Calendar> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
+    return ColorfulSafeArea(
+      color: subColor,
       child: Scaffold(
         backgroundColor: lightColor,
         floatingActionButton: TwoButtons(
