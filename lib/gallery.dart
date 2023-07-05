@@ -56,7 +56,6 @@ class _GalleryState extends State<Gallery> {
                                     MaterialPageRoute(
                                       builder: (context) => gallery_picture.GalleryPicture(
                                         imgList: _pickedImgs,
-                                        imgIndex: i,
                                       ),
                                     ));
                               },
