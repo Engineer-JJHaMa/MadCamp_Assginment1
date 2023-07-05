@@ -49,6 +49,9 @@ class _GalleryState extends State<Gallery> {
                     children: [
                       Container(
                           child: TextButton(
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                              ),
                               onPressed: () {
                                 Navigator.push(
                                     context,
@@ -60,6 +63,8 @@ class _GalleryState extends State<Gallery> {
                                     ));
                               },
                               child: Image.file(
+                                width: double.infinity,
+                                height: double.infinity,
                                 File(xf.path),
                                 fit: BoxFit.cover,
                               ))
