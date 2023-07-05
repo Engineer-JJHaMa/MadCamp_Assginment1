@@ -47,8 +47,7 @@ class _GalleryState extends State<Gallery> {
                 child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      Container(child: ConstrainedBox(
-                          constraints: BoxConstraints.expand(),
+                      Container(
                           child: TextButton(
                               onPressed: () {
                                 Navigator.push(
@@ -56,13 +55,15 @@ class _GalleryState extends State<Gallery> {
                                     MaterialPageRoute(
                                       builder: (context) => gallery_picture.GalleryPicture(
                                         imgList: _pickedImgs,
+                                        imgIndex: i,
                                       ),
                                     ));
                               },
                               child: Image.file(
                                 File(xf.path),
                                 fit: BoxFit.cover,
-                              )))),
+                              ))
+                      ),
                       Positioned(
                           right: 1,
                           child: GestureDetector(

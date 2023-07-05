@@ -9,9 +9,10 @@ import 'package:carousel_slider/carousel_slider.dart';
 
 
 class GalleryPicture extends StatefulWidget {
-  GalleryPicture({Key? key, required this.imgList})
+  GalleryPicture({Key? key, required this.imgList, required this.imgIndex})
       : super(key: key);
   final List<XFile> imgList;
+  int imgIndex;
   @override
   State<GalleryPicture> createState() => _GalleryPictureState();
 }
@@ -39,6 +40,7 @@ class _GalleryPictureState extends State<GalleryPicture>{
             )
         ),
         body: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox(
             child: Stack(
@@ -70,9 +72,9 @@ class _GalleryPictureState extends State<GalleryPicture>{
             },
           );
         } )).toList(), options: CarouselOptions(
+      initialPage: widget.imgIndex,
       height: 300,
       viewportFraction: 1.0,
-      autoPlay: true,
       autoPlayInterval: const Duration(seconds: 4),
       onPageChanged: (index, reason) {
         setState(() {
