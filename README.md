@@ -26,6 +26,8 @@
 
 ### C. 어플리케이션 소개  
 ### TAB 1 - 연락처
+![CGC_contacts_basic](./images/CGC_contacts_basic.jpg)|![CGC_contacts_search](./images/CGC_contacts_search.jpg)|![CGC_contacts_detail](./images/CGC_contacts_detail.jpg)
+---|---|---
 #### Magor features
 * Tab1에서 휴대전화에 저장된 연락처를 확인할 수 있습니다.
   * 각 연락처를 클릭하면 상세 정보 페이지로 넘어갑니다.
@@ -43,9 +45,10 @@
 * url_launcher를 이용하여 전화 걸기, 문자 보내기를 실행한다.
 * material library의 showSearch function을 이용하여 입력한 query를 포함하는 연락처 리스트를 표시한다.
 ***
+
 ### TAB 2 - 갤러리
-<!-- ||
----|---|--- -->
+![CGC_gallery_basic](./images/CGC_gallery_basic.jpg)|![CGC_gallery_floating](./images/CGC_gallery_floating.jpg)|![CGC_gallery_silder](./images/CGC_gallery_silder.jpg)
+---|---|---
 #### Major features
 * 기기에서 선택한 사진을 리스트업할 수 있습니다.
 * 하단 플로팅 버튼과, 이미지 우측 상단의 버튼을 통해 사진을 추가/삭제할 수 있습니다.

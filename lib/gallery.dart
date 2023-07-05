@@ -9,7 +9,7 @@ import './components/floatingbutton.dart';
 import './style.dart';
 
 class Gallery extends StatefulWidget {
-  const Gallery({Key? key}) : super(key: key);
+  Gallery({Key? key}) : super(key: key);
 
   @override
   State<Gallery> createState() => _GalleryState();
